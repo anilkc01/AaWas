@@ -1,6 +1,7 @@
 import { X, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import api from "../api/axois";
 
 export default function LoginModal() {
   const navigate = useNavigate();
@@ -11,86 +12,59 @@ export default function LoginModal() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
+
   // field-level errors
   const [errors, setErrors] = useState({
     email: "",
     password: "",
   });
 
-  const handleLogin = async () => {
-    // reset errors
-    let newErrors = { email: "", password: "" };
+ const handleLogin = async () => {
+  try {
+    setLoading(true);
+    setErrors({ email: "", password: "" });
 
-    // frontend validation
-    if (!email) newErrors.email = "Please enter an email address.";
-    if (!password) newErrors.password = "Please enter a password.";
+    const res = await api.post("/api/auth/login", {
+      email,
+      password,
+    });
 
-    if (newErrors.email || newErrors.password) {
-      setErrors(newErrors);
-      return;
-    }
+    const data = res.data;
 
-    try {
-      setLoading(true);
-      setErrors({ email: "", password: "" });
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-      const res = await fetch("http://localhost:5001/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    navigate("/dashboard");
+  } catch (err) {
+    if (err.response) {
+      const { status, data } = err.response;
 
-      if (res.status === 400) {
+      if (status === 401 && data.error === "EMAIL_NOT_FOUND") {
+        setErrors({ email: "No account found with this email.", password: "" });
+      }
+
+      if (status === 401 && data.error === "INVALID_PASSWORD") {
+        setErrors({ email: "", password: "Incorrect password." });
+      }
+
+      if (status === 400) {
         setErrors({
           email: !email ? "Please enter an email address." : "",
           password: !password ? "Please enter a password." : "",
         });
-        return;
       }
-
-      if (res.status === 401) {
-        const data = await res.json();
-
-        if (data.error === "EMAIL_NOT_FOUND") {
-          setErrors({
-            email: "No account found with this email.",
-            password: "",
-          });
-        }
-
-        if (data.error === "INVALID_PASSWORD") {
-          setErrors({
-            email: "",
-            password: "Incorrect password.",
-          });
-        }
-
-        return;
-      }
-
-      if (!res.ok) {
-        setErrors({
-          email: res.status,
-          password: res.statusText,
-        });
-        return;
-      }
-
-      const data = await res.json();
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      navigate("/dashboard");
-    } catch (err) {
+    } else {
       setErrors({
         email: "",
         password: "Network error. Please try again.",
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="relative bg-white rounded-2xl shadow-xl p-3 w-[196px] max-w-[90%]">

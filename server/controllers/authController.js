@@ -7,28 +7,41 @@ export const registerUser = async (req, res) => {
   try {
     const { fullName, email, phone, password, rePassword } = req.body;
 
-    // Basic validation
-    if (!fullName || !email || !phone || !password || !rePassword) {
-      return res.status(400).json({ message: "All fields are required" });
+    let errors = {};
+
+    // Required fields
+    if (!fullName) errors.fullName = "Full name is required.";
+    if (!email) errors.email = "Email is required.";
+    if (!phone) errors.phone = "Phone number is required.";
+    if (!password) errors.password = "Password is required.";
+    if (!rePassword) errors.rePassword = "Please re-enter password.";
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ errors });
     }
 
+    // Password match
     if (password !== rePassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
+      return res.status(400).json({
+        errors: {
+          rePassword: "Passwords do not match.",
+        },
+      });
     }
 
-    // Check existing user
-    const existingUser = await User.findOne({
-      where: { email },
-    });
+    // Existing email
+    const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
-      return res.status(409).json({ message: "Email already registered" });
+      return res.status(409).json({
+        errors: {
+          email: "Email already registered.",
+        },
+      });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     await User.create({
       fullName,
       email,
@@ -36,14 +49,22 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    return res.status(201).json({ message: "User registered successfully" });
+    return res.status(201).json({
+      message: "User registered successfully",
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({
+      errors: {
+        general: "Server error. Please try again.",
+      },
+    });
   }
 };
 
+
 export const loginUser = async (req, res) => {
+  console.log("Login attempt received");
   try {
     const { email, password } = req.body;
 
