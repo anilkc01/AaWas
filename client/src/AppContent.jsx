@@ -17,7 +17,7 @@ export default function AppContent() {
         <Welcome />
       </div>
       
-      {/*isLogin && (
+      {isLogin && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0 bg-black/20"></div>
           <LoginModal />
@@ -29,7 +29,7 @@ export default function AppContent() {
           <div className="absolute inset-0 bg-black/20"></div>
           <RegisterModal />
         </div>
-      )*/}
+      )}
     </>
   );
 }
