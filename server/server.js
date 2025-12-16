@@ -1,26 +1,25 @@
-const express = require('express');
-const path = require('path');
+import express from "express";
+import { connection } from "./Database/database.js";
+import authRoutes from "./routes/authRoutes.js";
+import cors from "cors";
+
 
 const app = express();
-const PORT = process.env.PORT || 5001;
 
-// Serve static files from the frontend (client/public)
-app.use(express.static(path.join(__dirname, '../client/src')));
+app.use(cors({
+  origin: "http://localhost:3000", // React dev server
+}));
 
-// Example API route
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from server!' });
+connection();
+
+app.get("/", (req, res) => {
+  res.send("Applicaiton is running");
 });
 
-// Catch-all route to serve index.html for any other request
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/src/app.js'));
-});
+app.use(express.json());
 
-app.get('/rajan', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/public/rajan.html'));
-});
+app.use("/api/auth", authRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(5001, () => {
+  console.log("Server is running on port 5001");
 });

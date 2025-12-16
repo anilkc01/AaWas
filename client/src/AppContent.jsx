@@ -1,20 +1,24 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import {  useLocation } from "react-router-dom";
 import Navbar from "./components/NavBar1";
 import Welcome from "./pages/welcome";
 import LoginModal from "./components/LoginModal";
 import RegisterModal from "./components/RegistrationModal";
+import AboutUs from "./pages/aboutUs";
 
 export default function AppContent() {
   const location = useLocation();
   const isLogin = location.pathname === "/login";
   const isRegister = location.pathname === "/register";
+  const isAboutUs = location.pathname === "/about-us";
+
   const showModal = isLogin || isRegister;
 
   return (
     <>
       <div className={showModal ? "filter blur-sm pointer-events-none" : ""}>
         <Navbar />
-        <Welcome />
+        {isAboutUs ? <AboutUs /> : <Welcome />}
+        
       </div>
       
       {isLogin && (

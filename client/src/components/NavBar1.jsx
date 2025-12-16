@@ -13,7 +13,7 @@ export default function Navbar() {
 
         
         <div className="flex items-center gap-4 text-gray-700 text-sm">
-          <Link to="/about" className="hover:text-black px-2 py-1">
+          <Link to="/about-us" className="hover:text-black px-2 py-1">
             About Us
           </Link>
 
