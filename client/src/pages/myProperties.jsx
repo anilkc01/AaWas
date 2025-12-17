@@ -24,6 +24,7 @@ export default function MyProperties() {
   const fetchProperties = async () => {
     try {
       const res = await api.get("/api/properties/my-properties");
+      console.log("Fetched properties:", res.data);
       setProperties(res.data);
     } catch (err) {
       console.error(err);

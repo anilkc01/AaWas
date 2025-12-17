@@ -1,4 +1,5 @@
 export default function PropertyCard({ property }) {
+
   return (
     <div className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
       <img
