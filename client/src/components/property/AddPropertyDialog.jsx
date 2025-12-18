@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Upload, Plus, MapPin } from 'lucide-react';
 import api from '../../api/axios';
 
-export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
+export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     propertyType: '',
     listedFor: '',
@@ -14,6 +14,7 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
     beds: 1,
     living: 1,
     kitchen: 1,
+    washrooms: 1,
     dpImage: null,
     images: [],
     isBidding: false
@@ -42,6 +43,7 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
         beds: 1,
         living: 1,
         kitchen: 1,
+        washrooms: 1,
         dpImage: null,
         images: [],
         isBidding: false
@@ -221,6 +223,7 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
       data.append('beds', formData.beds);
       data.append('living', formData.living);
       data.append('kitchen', formData.kitchen);
+      data.append('washrooms', formData.washrooms);
       data.append('isBidding', formData.isBidding);
       
       data.append('dpImage', formData.dpImage);
@@ -250,25 +253,26 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Add New Property</h2>
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[999] p-2">
+      <div className="bg-white rounded-2xl shadow-xl w-[280px] max-w-[90%] max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b px-3 py-2 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-xs font-semibold">Add Property</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
+            <X size={14} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-3 space-y-2.5">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-2 py-1.5 rounded-lg text-[9px]">
               {error}
             </div>
           )}
 
           {/* Display Picture */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-[9px] font-medium text-gray-700 mb-1">
               Display Picture <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -282,14 +286,14 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
               />
               <label
                 htmlFor="dpImage"
-                className="flex items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
+                className="flex items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
               >
                 {dpImagePreview ? (
                   <img src={dpImagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
                 ) : (
                   <div className="text-center">
-                    <Upload className="mx-auto text-gray-400 mb-2" size={32} />
-                    <p className="text-sm text-gray-500">Tap to add display picture</p>
+                    <Upload className="mx-auto text-gray-400 mb-1" size={16} />
+                    <p className="text-[8px] text-gray-500">Add picture</p>
                   </div>
                 )}
               </label>
@@ -297,52 +301,48 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           </div>
 
           {/* Property Type & Listing Type */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <select
-                name="propertyType"
-                value={formData.propertyType}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-              >
-                <option value="" disabled>Property Type : *</option>
-                <option value="house">House</option>
-                <option value="apartment">Apartment</option>
-                <option value="room">Room</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              name="propertyType"
+              value={formData.propertyType}
+              onChange={handleInputChange}
+              required
+              className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-[9px] text-gray-700"
+            >
+              <option value="" disabled>Type *</option>
+              <option value="house">House</option>
+              <option value="apartment">Apartment</option>
+              <option value="room">Room</option>
+            </select>
 
-            <div>
-              <select
-                name="listedFor"
-                value={formData.listedFor}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-              >
-                <option value="" disabled>Listing Type : *</option>
-                <option value="sell">Sell</option>
-                <option value="rent">Rent</option>
-              </select>
-            </div>
+            <select
+              name="listedFor"
+              value={formData.listedFor}
+              onChange={handleInputChange}
+              required
+              className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-[9px] text-gray-700"
+            >
+              <option value="" disabled>For *</option>
+              <option value="sell">Sell</option>
+              <option value="rent">Rent</option>
+            </select>
           </div>
 
           {/* Bidding Toggle */}
-          <div className="flex items-center justify-between py-2 border-b">
-            <label className="text-sm font-medium text-gray-700">
-              Bid
+          <div className="flex items-center justify-between py-1.5 border-b">
+            <label className="text-[9px] font-medium text-gray-700">
+              Enable Bidding
             </label>
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, isBidding: !prev.isBidding }))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
                 formData.isBidding ? 'bg-red-500' : 'bg-gray-300'
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  formData.isBidding ? 'translate-x-6' : 'translate-x-1'
+                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                  formData.isBidding ? 'translate-x-4' : 'translate-x-0.5'
                 }`}
               />
             </button>
@@ -350,8 +350,8 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Price */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price <span className="text-red-500">*</span> {formData.listedFor === 'rent' && <span className="text-gray-500 text-xs">(per month)</span>}
+            <label className="block text-[9px] font-medium text-gray-700 mb-1">
+              Price <span className="text-red-500">*</span> {formData.listedFor === 'rent' && <span className="text-gray-500">(monthly)</span>}
             </label>
             <input
               type="number"
@@ -360,52 +360,51 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
               onChange={handleInputChange}
               required
               placeholder="Enter price"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-[9px]"
             />
             {formData.isBidding && (
-              <p className="text-xs text-blue-600 mt-1">
-                This price will be used as the minimum starting price for bidding
+              <p className="text-[8px] text-blue-600 mt-0.5">
+                Starting bid price
               </p>
             )}
           </div>
 
           {/* Location with Map */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-[9px] font-medium text-gray-700 mb-1">
               Location <span className="text-red-500">*</span>
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleInputChange}
                 required
-                placeholder="Enter location or select on map"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter location"
+                className="flex-1 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-[9px]"
               />
               <button
                 type="button"
                 onClick={() => setShowMap(!showMap)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                className="px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
               >
-                <MapPin size={18} />
-                {showMap ? 'Hide' : 'Map'}
+                <MapPin size={11} />
+                <span className="text-[8px]">{showMap ? 'Hide' : 'Map'}</span>
               </button>
             </div>
             
             {showMap && (
-              <div className="mt-3">
+              <div className="mt-2">
                 <div 
                   ref={mapRef} 
-                  className="w-full h-64 rounded-lg border border-gray-300"
-                  style={{ minHeight: '250px' }}
+                  className="w-full h-32 rounded-lg border border-gray-300"
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  Click on the map to select exact location
+                <p className="text-[7px] text-gray-500 mt-1">
+                  Click map to select location
                   {formData.latitude && formData.longitude && (
-                    <span className="ml-2 text-blue-600">
-                      ({formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)})
+                    <span className="ml-1 text-blue-600">
+                      ({formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)})
                     </span>
                   )}
                 </p>
@@ -414,9 +413,9 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           </div>
 
           {/* Room Counts */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-1.5">
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Living <span className="text-red-500">*</span></label>
+              <label className="block text-[8px] text-gray-600 mb-0.5">Living *</label>
               <input
                 type="number"
                 name="living"
@@ -424,12 +423,12 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleInputChange}
                 min="1"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-1.5 py-1 border border-gray-300 rounded text-[9px] focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Bed <span className="text-red-500">*</span></label>
+              <label className="block text-[8px] text-gray-600 mb-0.5">Bed *</label>
               <input
                 type="number"
                 name="beds"
@@ -437,12 +436,12 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleInputChange}
                 min="1"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-1.5 py-1 border border-gray-300 rounded text-[9px] focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Kitchen <span className="text-red-500">*</span></label>
+              <label className="block text-[8px] text-gray-600 mb-0.5">Kitchen *</label>
               <input
                 type="number"
                 name="kitchen"
@@ -450,14 +449,27 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleInputChange}
                 min="1"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-1.5 py-1 border border-gray-300 rounded text-[9px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[8px] text-gray-600 mb-0.5">Bath *</label>
+              <input
+                type="number"
+                name="washrooms"
+                value={formData.washrooms}
+                onChange={handleInputChange}
+                min="1"
+                required
+                className="w-full px-1.5 py-1 border border-gray-300 rounded text-[9px] focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-[9px] font-medium text-gray-700 mb-1">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -465,16 +477,16 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
               value={formData.description}
               onChange={handleInputChange}
               required
-              rows="4"
-              placeholder="Enter property description"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              rows="3"
+              placeholder="Property description"
+              className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none text-[9px]"
             />
           </div>
 
           {/* Additional Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Additional Photos (Optional)
+            <label className="block text-[9px] font-medium text-gray-700 mb-1">
+              More Photos (Optional)
             </label>
             <input
               type="file"
@@ -486,19 +498,19 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
             />
             <label
               htmlFor="images"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-sm"
+              className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[9px]"
             >
-              <Plus size={18} className="mr-2" />
+              <Plus size={11} className="mr-1" />
               Add photos
             </label>
             {imagePreviews.length > 0 && (
-              <div className="grid grid-cols-4 gap-2 mt-3">
+              <div className="grid grid-cols-4 gap-1 mt-1.5">
                 {imagePreviews.map((preview, index) => (
                   <img
                     key={index}
                     src={preview}
                     alt={`Preview ${index + 1}`}
-                    className="w-full h-20 object-cover rounded-lg"
+                    className="w-full h-12 object-cover rounded"
                   />
                 ))}
               </div>
@@ -506,12 +518,12 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[9px]"
             >
               Cancel
             </button>
@@ -519,11 +531,11 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-[9px]"
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
@@ -539,4 +551,3 @@ export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
     </div>
   );
 };
-

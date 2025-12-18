@@ -47,6 +47,10 @@ const Property = sequelize.define("Property", {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+  washroom: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
   dpImage: {
     type: DataTypes.STRING,
     allowNull: false,
