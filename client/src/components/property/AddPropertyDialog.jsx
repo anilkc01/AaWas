@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Upload, Plus, MapPin } from 'lucide-react';
 import api from '../../api/axios';
 
-export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
+const API_BASE = process.env.REACT_APP_API_BASE;
+
+export const AddPropertyDialog = ({ isOpen, onClose, onSubmit, property }) => {
   const [formData, setFormData] = useState({
     propertyType: '',
     listedFor: '',
@@ -14,7 +16,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
     beds: 1,
     living: 1,
     kitchen: 1,
-    washrooms: 1,
+    washroom: 1,
     dpImage: null,
     images: [],
     isBidding: false
@@ -28,6 +30,59 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+
+  // Load property data when editing
+  useEffect(() => {
+    if (isOpen && property) {
+      // Editing mode - populate form with property data
+      setFormData({
+        propertyType: property.propertyType || '',
+        listedFor: property.listedFor || '',
+        price: property.price || '',
+        location: property.location || '',
+        latitude: property.latitude || null,
+        longitude: property.longitude || null,
+        description: property.description || '',
+        beds: property.beds || 1,
+        living: property.living || 1,
+        kitchen: property.kitchen || 1,
+        washroom: property.washroom || 1,
+        dpImage: null, // Keep null, will use existing image
+        images: [],
+        isBidding: property.isBidding || false
+      });
+
+      // Set existing display image preview
+      if (property.dpImage) {
+        setDpImagePreview(`${API_BASE}/${property.dpImage}`);
+      }
+
+      // Set existing images preview
+      if (property.images && property.images.length > 0) {
+        setImagePreviews(property.images.map(img => `${API_BASE}/${img}`));
+      }
+    } else if (isOpen && !property) {
+      // Adding mode - reset to empty form
+      setFormData({
+        propertyType: '',
+        listedFor: '',
+        price: '',
+        location: '',
+        latitude: null,
+        longitude: null,
+        description: '',
+        beds: 1,
+        living: 1,
+        kitchen: 1,
+        washroom: 1,
+        dpImage: null,
+        images: [],
+        isBidding: false
+      });
+      setDpImagePreview(null);
+      setImagePreviews([]);
+    }
+  }, [isOpen, property]);
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -43,7 +98,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
         beds: 1,
         living: 1,
         kitchen: 1,
-        washrooms: 1,
+        washroom: 1,
         dpImage: null,
         images: [],
         isBidding: false
@@ -180,7 +235,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
     if (e) e.preventDefault();
 
     // Validation
-    if (!formData.dpImage) {
+    if (!formData.dpImage && !property) {
       setError("Display image is required");
       return;
     }
@@ -223,28 +278,46 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
       data.append('beds', formData.beds);
       data.append('living', formData.living);
       data.append('kitchen', formData.kitchen);
-      data.append('washrooms', formData.washrooms);
+      data.append('washroom', formData.washroom);
       data.append('isBidding', formData.isBidding);
       
-      data.append('dpImage', formData.dpImage);
+      // Only append new display image if one was selected
+      if (formData.dpImage) {
+        data.append('dpImage', formData.dpImage);
+      }
       
+      // Only append new images if any were selected
       formData.images.forEach((image) => {
-        data.append('images', image);
-      });
-
-      const response = await api.post('/api/properties/create', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+        if (image instanceof File) {
+          data.append('images', image);
         }
       });
 
-      alert("Property created successfully!");
+      let response;
+      if (property) {
+        // Update existing property
+        response = await api.patch(`/api/properties/${property.id}`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+        alert("Property updated successfully!");
+      } else {
+        // Create new property
+        response = await api.post('/api/properties/create', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+        alert("Property created successfully!");
+      }
+
       onSubmit(response.data);
       onClose();
       
     } catch (err) {
-      console.error('Error creating property:', err);
-      setError(err.response?.data?.message || 'Failed to create property');
+      console.error('Error saving property:', err);
+      setError(err.response?.data?.message || 'Failed to save property');
     } finally {
       setLoading(false);
     }
@@ -252,12 +325,16 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
 
   if (!isOpen) return null;
 
+  const isEditing = !!property;
+
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[999] p-2">
       <div className="bg-white rounded-2xl shadow-xl w-[280px] max-w-[90%] max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b px-3 py-2 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-xs font-semibold">Add Property</h2>
+          <h2 className="text-xs font-semibold">
+            {isEditing ? 'Edit Property' : 'Add Property'}
+          </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={14} />
           </button>
@@ -273,7 +350,8 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           {/* Display Picture */}
           <div>
             <label className="block text-[9px] font-medium text-gray-700 mb-1">
-              Display Picture <span className="text-red-500">*</span>
+              Display Picture {!isEditing && <span className="text-red-500">*</span>}
+              {isEditing && <span className="text-gray-500">(leave empty to keep current)</span>}
             </label>
             <div className="relative">
               <input
@@ -282,7 +360,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleDpImageChange}
                 className="hidden"
                 id="dpImage"
-                required
+                required={!isEditing}
               />
               <label
                 htmlFor="dpImage"
@@ -457,8 +535,8 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
               <label className="block text-[8px] text-gray-600 mb-0.5">Bath *</label>
               <input
                 type="number"
-                name="washrooms"
-                value={formData.washrooms}
+                name="washroom"
+                value={formData.washroom}
                 onChange={handleInputChange}
                 min="1"
                 required
@@ -539,10 +617,10 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Submitting...
+                  {isEditing ? 'Updating...' : 'Submitting...'}
                 </>
               ) : (
-                'Submit'
+                isEditing ? 'Update' : 'Submit'
               )}
             </button>
           </div>
