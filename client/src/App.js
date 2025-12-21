@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import AppContent from "./AppContent";
-import SplashScreen from "./pages/SplashScreen";
+import SplashScreen from "./layouts/SplashScreen";
 
 export default function App() {
   const [loading, setLoading] = useState(true);

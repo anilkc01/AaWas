@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { generateToken } from "../Security/jwt-utils.js";
-
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
   try {
@@ -62,11 +62,10 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
 export const loginUser = async (req, res) => {
   console.log("Login attempt received");
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
 
     if (!email || !password) {
       return res
@@ -82,7 +81,7 @@ export const loginUser = async (req, res) => {
       });
     }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -90,7 +89,9 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const token = generateToken({ users: user.toJSON() });
+   
+
+    const token = generateToken({ id: user.id }, remember);
 
     return res.status(200).json({
       message: "Login successful",
@@ -106,4 +107,14 @@ export const loginUser = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
+};
+
+export const verifyToken = (req, res) => {
+  res.status(200).json({
+    valid: true,
+    user: {
+      id: req.user.id,
+      email: req.user.email,
+    },
+  });
 };
