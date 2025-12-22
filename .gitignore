@@ -20,6 +20,8 @@ npm-debug.log*
 # Database
 *.sql
 
+server/uploads
+
 # OS
 .DS_Store
 Thumbs.db
