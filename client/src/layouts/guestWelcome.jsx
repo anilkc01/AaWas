@@ -1,9 +1,9 @@
 import { useLocation } from "react-router-dom";
-import Navbar from "../components/NavBar1";
+import Navbar from "../components/navBars/NavBar1";
 import Welcome from "../pages/welcome";
 import AboutUs from "../pages/aboutUs";
-import LoginModal from "../components/LoginModal";
-import RegisterModal from "../components/RegistrationModal";
+import LoginModal from "../components/AuthModals/LoginModal";
+import RegisterModal from "../components/AuthModals/RegistrationModal";
 
 
 export default function GuestPage({ onLoginSuccess }) {

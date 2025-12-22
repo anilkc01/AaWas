@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import AppContent from "./AppContent";
 import SplashScreen from "./layouts/SplashScreen";
+import Navbar from "./components/navBars/NavBar1";
+import Welcome from "./pages/welcome";
 
 export default function App() {
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,4 +20,5 @@ export default function App() {
       {loading ? <SplashScreen /> : <AppContent />}
     </BrowserRouter>
   );
+ 
 }

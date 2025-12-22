@@ -23,9 +23,7 @@ const storage = (folder) =>
     },
     filename: (req, file, cb) => {
       const ext = path.extname(file.originalname);
-      const name = `${Date.now()}-${Math.round(
-        Math.random() * 1e9
-      )}${ext}`;
+      const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
       cb(null, name);
     },
   });
@@ -37,7 +35,6 @@ const fileFilter = (req, file, cb) => {
   const allowed = /jpeg|jpg|png|webp/;
   const ext = allowed.test(path.extname(file.originalname).toLowerCase());
   const mime = allowed.test(file.mimetype);
-
   if (ext && mime) cb(null, true);
   else cb(new Error("Only image files are allowed"));
 };
@@ -63,5 +60,15 @@ const upload = (folder, options = {}) => {
     ? multerUpload.array(field, max)
     : multerUpload.single(field);
 };
+
+// ADD THIS NEW FUNCTION:
+export const uploadPropertyImages = multer({
+  storage: storage("properties"),
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).fields([
+  { name: "dpImage", maxCount: 1 },
+  { name: "images", maxCount: 10 },
+]);
 
 export default upload;

@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import api from "./api/axios";
 import DashboardPage from "./layouts/UserDashboard";
 import GuestPage from "./layouts/guestWelcome";
+import { useLocation } from "react-router-dom";
+import Navbar from "./components/navBars/NavBar1";
+import AboutUs from "./pages/aboutUs";
+import Welcome from "./pages/welcome";
 
 
 
 export default function AppContent() {
+   
   const [authChecked, setAuthChecked] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
@@ -41,4 +46,8 @@ export default function AppContent() {
   return authorized
     ? <DashboardPage  onLogout={() => setAuthorized(false)} />
     : <GuestPage onLoginSuccess={checkAuth} />;
+
+  
+
+
 }
