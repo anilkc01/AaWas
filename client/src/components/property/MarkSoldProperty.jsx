@@ -12,7 +12,7 @@ function PropertyCard({ title, price, image, isSold }) {
             backgroundColor: "red",
             color: "white",
             padding: "5px 10px",
-            fontWeight: "bold",
+            fontWeight: "italic",
             borderRadius: "4px",
             zIndex: 1
           }}
