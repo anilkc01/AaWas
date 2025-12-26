@@ -70,9 +70,3 @@ export default function AdminDashboard() {
   );
 }
 
-const cardStyle = {
-  border: "1px solid #ccc",
-  padding: "15px",
-  width: "200px",
-  textAlign: "center",
-};
