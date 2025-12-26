@@ -1,108 +1,40 @@
-import { useEffect, useState } from "react";
-import api from "../api/axios";
-
-import KycForm from "../components/Kyc/kycForm";
-import PropertyCard from "../components/property/PropertyCard";
-import AddPropertyCard from "../components/property/AddPropertyCard";
-import { AddPropertyDialog } from "../components/property/AddPropertyDialog";
-
-export default function MyProperties() {
+export default function MyProperties({ filters = {} }) {
   const [kycStatus, setKycStatus] = useState("loading");
   const [properties, setProperties] = useState([]);
-
   const [openDialog, setOpenDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
 
-  /* ---------------- KYC ---------------- */
-  const fetchKycStatus = async () => {
-    try {
-      const res = await api.get("/api/kyc/status");
-      setKycStatus(res.data.status);
-    } catch (err) {
-      console.error(err);
-      setKycStatus("error");
-    }
-  };
+  /* ... your existing fetch functions ... */
 
-  /* ---------------- PROPERTIES ---------------- */
-  const fetchProperties = async () => {
-    try {
-      const res = await api.get("/api/properties/my-properties");
-      setProperties(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // Add filtering logic
+  const filteredProperties = properties.filter(property => {
+    // If no filters are active, show all
+    const hasActiveFilters = Object.values(filters).some(v => v);
+    if (!hasActiveFilters) return true;
 
-  useEffect(() => {
-    fetchKycStatus();
-  }, []);
+    // Check each filter
+    if (filters.forSale && property.listingType !== 'sale') return false;
+    if (filters.forRent && property.listingType !== 'rent') return false;
+    if (filters.furnished && !property.furnished) return false;
+    if (filters.parking && !property.parking) return false;
+    
+    return true;
+  });
 
-  useEffect(() => {
-    if (kycStatus === "verified") {
-      fetchProperties();
-    }
-  }, [kycStatus]);
-
-  /* ---------------- HANDLERS ---------------- */
-
-  const handleAdd = () => {
-    setEditingProperty(null);
-    setOpenDialog(true);
-  };
-
-  const handleEdit = (property) => {
-    setEditingProperty(property);
-    setOpenDialog(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this property?")) return;
-    try {
-      await api.delete(`/api/properties/${id}`);
-      fetchProperties();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDisable = async (id) => {
-    try {
-      await api.patch(`/api/properties/${id}/disable`);
-      fetchProperties();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handlePropertySubmit = async () => {
-    setOpenDialog(false);
-    setEditingProperty(null);
-    fetchProperties();
-  };
-
-  /* ---------------- RENDER ---------------- */
-
-  if (kycStatus === "loading") {
-    return (
-      <div className="pt-5 p-4">
-        <p>Checking KYC status...</p>
-      </div>
-    );
-  }
+  /* ... rest of your code ... */
 
   return (
     <div className="pt-5 p-4">
       <h1 className="text-2xl font-bold mb-6">My Properties</h1>
-
+      
       {kycStatus !== "verified" && (
         <KycForm status={kycStatus} onSuccess={fetchKycStatus} />
       )}
-
+      
       {kycStatus === "verified" && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {properties.map((property) => (
+            {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}
                 property={property}
@@ -111,9 +43,12 @@ export default function MyProperties() {
                 onDisable={(p) => handleDisable(p.id)}
               />
             ))}
-
             <AddPropertyCard onClick={handleAdd} />
           </div>
+
+          {filteredProperties.length === 0 && properties.length > 0 && (
+            <p className="text-center text-gray-500 mt-8">No properties match your filters</p>
+          )}
 
           <AddPropertyDialog
             isOpen={openDialog}
