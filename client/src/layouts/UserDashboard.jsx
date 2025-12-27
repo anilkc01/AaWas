@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "../components/NavBar2.jsx";
+import Navbar from "../components/navBars/NavBar2.jsx";
 import BrowseProperties from "../pages/browseProperties.jsx";
 import MyProperties from "../pages/myProperties.jsx";
 
