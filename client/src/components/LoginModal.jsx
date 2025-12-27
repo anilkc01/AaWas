@@ -1,9 +1,10 @@
 import { X, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import api from "../api/axois";
+import api from "../api/axios";
 
-export default function LoginModal() {
+export default function LoginModal({ onLoginSuccess }) {
+  console.log("Rendering LoginModal");
   const navigate = useNavigate();
   const closeModal = () => navigate("/");
 
@@ -11,8 +12,7 @@ export default function LoginModal() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-
+  const [rememberMe, setRememberMe] = useState(false);
 
   // field-level errors
   const [errors, setErrors] = useState({
@@ -20,51 +20,66 @@ export default function LoginModal() {
     password: "",
   });
 
- const handleLogin = async () => {
-  try {
-    setLoading(true);
-    setErrors({ email: "", password: "" });
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      setErrors({ email: "", password: "" });
 
-    const res = await api.post("/api/auth/login", {
-      email,
-      password,
-    });
+      console.log("Attempting login with:", { email, password, rememberMe });
 
-    const data = res.data;
+      const res = await api.post("/api/auth/login", {
+        email,
+        password,
+        rememberMe,
+      });
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+      const { token, user } = res.data;
+      console.log("Login successful:", res.data);
 
-    navigate("/dashboard");
-  } catch (err) {
-    if (err.response) {
-      const { status, data } = err.response;
-
-      if (status === 401 && data.error === "EMAIL_NOT_FOUND") {
-        setErrors({ email: "No account found with this email.", password: "" });
+      if (rememberMe) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+      } else {
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("user", JSON.stringify(user));
       }
 
-      if (status === 401 && data.error === "INVALID_PASSWORD") {
-        setErrors({ email: "", password: "Incorrect password." });
+      if (typeof onLoginSuccess === "function") {
+        onLoginSuccess();
       }
 
-      if (status === 400) {
+      navigate("/");
+    } catch (err) {
+      if (err.response) {
+        const { status, data } = err.response;
+
+        if (status === 401 && data.error === "EMAIL_NOT_FOUND") {
+          setErrors({
+            email: "No account found with this email.",
+            password: "",
+          });
+        }
+
+        if (status === 401 && data.error === "INVALID_PASSWORD") {
+          setErrors({ email: "", password: "Incorrect password." });
+        }
+
+        if (status === 400) {
+          setErrors({
+            email: !email ? "Please enter an email address." : "",
+            password: !password ? "Please enter a password." : "",
+          });
+        }
+      } else {
         setErrors({
-          email: !email ? "Please enter an email address." : "",
-          password: !password ? "Please enter a password." : "",
+          email: "",
+          password: "Network error. Please try again.",
         });
       }
-    } else {
-      setErrors({
-        email: "",
-        password: "Network error. Please try again.",
-      });
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="relative bg-white rounded-2xl shadow-xl p-3 w-[196px] max-w-[90%]">
@@ -136,6 +151,29 @@ export default function LoginModal() {
       {errors.password && (
         <p className="text-[8px] text-red-500 mb-2">{errors.password}</p>
       )}
+
+      <p
+        onClick={() => navigate("/forgot-password")}
+        className="text-[8px] text-[#B59353] cursor-pointer hover:underline text-right mb-2"
+      >
+        Forgot password?
+      </p>
+
+      <div className="flex items-center gap-1 mb-2">
+        <input
+          type="checkbox"
+          id="rememberMe"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="w-3 h-3 cursor-pointer"
+        />
+        <label
+          htmlFor="rememberMe"
+          className="text-[8px] text-gray-600 cursor-pointer"
+        >
+          Remember me
+        </label>
+      </div>
 
       {/* Login button */}
       <button
