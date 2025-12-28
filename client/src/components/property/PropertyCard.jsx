@@ -1,5 +1,10 @@
 export default function PropertyCard({ property }) {
 
+     const getShortLocation = (location) => {
+    if (!location) return 'Unknown';
+    return location.split(',')[0].trim();
+  };
+  
   return (
     <div className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
       <img
@@ -9,7 +14,7 @@ export default function PropertyCard({ property }) {
       />
       <div className="p-3">
         <p className="text-sm text-gray-600">
-          📍 {property.location}
+          📍 {getShortLocation(property.location)}
         </p>
         <div className="flex gap-4 text-xs mt-2 text-gray-700">
           <span>{property.beds} bed</span>

@@ -31,6 +31,7 @@ export const getMyProperties = async (req, res) => {
       beds,
       living,
       kitchen,
+      washroom,
       isBidding,
     } = req.body;
 
@@ -61,6 +62,7 @@ export const getMyProperties = async (req, res) => {
       beds: parseInt(beds) || 0,
       living: parseInt(living) || 0,
       kitchen: parseInt(kitchen) || 0,
+      washroom: parseInt(washroom) || 0,
       dpImage,
       images,
       isBidding: isBidding === "true" || isBidding === true,

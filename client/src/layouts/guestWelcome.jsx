@@ -16,10 +16,12 @@ export default function GuestPage({ onLoginSuccess }) {
   const showModal = isLogin || isRegister;
 
   return (
+    
     <>
       <div className={showModal ? "filter blur-sm pointer-events-none" : ""}>
         <Navbar />
-        {isAboutUs ? <AboutUs /> : <Welcome />}
+        {isAboutUs? <AboutUs /> : <Welcome />}
+        
       </div>
 
       {isLogin && (
@@ -28,6 +30,7 @@ export default function GuestPage({ onLoginSuccess }) {
           <LoginModal onLoginSuccess={onLoginSuccess} />
         </div>
       )}
+
 
       {isRegister && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -38,3 +41,5 @@ export default function GuestPage({ onLoginSuccess }) {
     </>
   );
 }
+
+
