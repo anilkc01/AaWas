@@ -1,30 +1,33 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+
 import KycForm from "../components/Kyc/kycForm";
 import PropertyCard from "../components/property/PropertyCard";
 import AddPropertyCard from "../components/property/AddPropertyCard";
 import { AddPropertyDialog } from "../components/property/AddPropertyDialog";
 
-
 export default function MyProperties() {
   const [kycStatus, setKycStatus] = useState("loading");
   const [properties, setProperties] = useState([]);
-  const [openAdd, setOpenAdd] = useState(false);
 
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingProperty, setEditingProperty] = useState(null);
+
+  /* ---------------- KYC ---------------- */
   const fetchKycStatus = async () => {
     try {
       const res = await api.get("/api/kyc/status");
-      setKycStatus(res.data.status); // verified | pending | rejected | not_submitted
+      setKycStatus(res.data.status);
     } catch (err) {
       console.error(err);
       setKycStatus("error");
     }
   };
 
+  /* ---------------- PROPERTIES ---------------- */
   const fetchProperties = async () => {
     try {
       const res = await api.get("/api/properties/my-properties");
-      console.log("Fetched properties:", res.data);
       setProperties(res.data);
     } catch (err) {
       console.error(err);
@@ -41,10 +44,44 @@ export default function MyProperties() {
     }
   }, [kycStatus]);
 
-  const handlePropertySubmit = (data) => {
-    console.log("Property submitted:", data);
-    fetchProperties(); // Refresh the properties list
+  /* ---------------- HANDLERS ---------------- */
+
+  const handleAdd = () => {
+    setEditingProperty(null);
+    setOpenDialog(true);
   };
+
+  const handleEdit = (property) => {
+    setEditingProperty(property);
+    setOpenDialog(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this property?")) return;
+    try {
+      await api.delete(`/api/properties/${id}`);
+      fetchProperties();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDisable = async (id) => {
+    try {
+      await api.patch(`/api/properties/${id}/disable`);
+      fetchProperties();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePropertySubmit = async () => {
+    setOpenDialog(false);
+    setEditingProperty(null);
+    fetchProperties();
+  };
+
+  /* ---------------- RENDER ---------------- */
 
   if (kycStatus === "loading") {
     return (
@@ -58,28 +95,33 @@ export default function MyProperties() {
     <div className="pt-5 p-4">
       <h1 className="text-2xl font-bold mb-6">My Properties</h1>
 
-      {/* KYC NOT VERIFIED */}
       {kycStatus !== "verified" && (
         <KycForm status={kycStatus} onSuccess={fetchKycStatus} />
       )}
 
-      {/* KYC VERIFIED */}
       {kycStatus === "verified" && (
         <>
-          {/* PROPERTIES GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onEdit={handleEdit}
+                onDelete={(p) => handleDelete(p.id)}
+                onDisable={(p) => handleDisable(p.id)}
+              />
             ))}
 
-            {/* ADD PROPERTY TILE */}
-            <AddPropertyCard onClick={() => setOpenAdd(true)} />
+            <AddPropertyCard onClick={handleAdd} />
           </div>
 
-          {/* ADD PROPERTY DIALOG */}
           <AddPropertyDialog
-            isOpen={openAdd}
-            onClose={() => setOpenAdd(false)}
+            isOpen={openDialog}
+            property={editingProperty}
+            onClose={() => {
+              setOpenDialog(false);
+              setEditingProperty(null);
+            }}
             onSubmit={handlePropertySubmit}
           />
         </>

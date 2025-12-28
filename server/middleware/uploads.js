@@ -61,7 +61,11 @@ const upload = (folder, options = {}) => {
     : multerUpload.single(field);
 };
 
-// ADD THIS NEW FUNCTION:
+/**
+ * Property images upload middleware
+ * Temporarily stores in uploads/properties (temp location)
+ * Files will be moved to property-specific folders after property creation
+ */
 export const uploadPropertyImages = multer({
   storage: storage("properties"),
   fileFilter,
