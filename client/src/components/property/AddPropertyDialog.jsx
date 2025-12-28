@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Upload, Plus, MapPin } from 'lucide-react';
 import api from '../../api/axios';
 
-
-export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
+export  const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     propertyType: '',
     listedFor: '',
@@ -12,9 +11,9 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
     latitude: null,
     longitude: null,
     description: '',
-    beds: 0,
-    living: 0,
-    kitchen: 0,
+    beds: 1,
+    living: 1,
+    kitchen: 1,
     dpImage: null,
     images: [],
     isBidding: false
@@ -23,17 +22,15 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
   const [dpImagePreview, setDpImagePreview] = useState(null);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [showMap, setShowMap] = useState(false);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
-  const markerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
 
-   // Reset form when dialog closes or opens
+  // Reset form when dialog closes
   useEffect(() => {
     if (!isOpen) {
-      // Reset form data
       setFormData({
         propertyType: '',
         listedFor: '',
@@ -42,9 +39,9 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
         latitude: null,
         longitude: null,
         description: '',
-        beds: 0,
-        living: 0,
-        kitchen: 0,
+        beds: 1,
+        living: 1,
+        kitchen: 1,
         dpImage: null,
         images: [],
         isBidding: false
@@ -54,49 +51,49 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
       setShowMap(false);
       setError(null);
       
-      // Clear map marker
-      if (markerRef.current) {
-        markerRef.current.setMap(null);
+      if (markerRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(markerRef.current);
         markerRef.current = null;
       }
     }
   }, [isOpen]);
 
-  // Load Google Maps Script
+  // Load Leaflet CSS and JS
   useEffect(() => {
-    if (!window.google && !document.querySelector('script[src*="maps.googleapis"]')) {
+    if (!document.querySelector('link[href*="leaflet.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+
+    if (!window.L) {
       const script = document.createElement('script');
-      // Replace with your actual Google Maps API key
-      const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
       script.async = true;
-      script.onload = () => setMapLoaded(true);
-      script.onerror = () => {
-        console.error('Failed to load Google Maps');
-        setError('Failed to load Google Maps. Please check your API key.');
-      };
       document.head.appendChild(script);
-    } else if (window.google) {
-      setMapLoaded(true);
     }
   }, []);
 
-  // Initialize Map
+  // Initialize OpenStreetMap
   useEffect(() => {
-    if (showMap && mapLoaded && mapRef.current && !mapInstanceRef.current) {
-      const defaultLocation = { lat: 27.7172, lng: 85.3240 }; // Kathmandu
+    if (showMap && mapRef.current && !mapInstanceRef.current && window.L) {
+      const defaultLocation = [27.7172, 85.3240]; // Kathmandu
       
-      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-        center: formData.latitude && formData.longitude 
-          ? { lat: formData.latitude, lng: formData.longitude }
+      mapInstanceRef.current = window.L.map(mapRef.current).setView(
+        formData.latitude && formData.longitude 
+          ? [formData.latitude, formData.longitude]
           : defaultLocation,
-        zoom: 13,
-      });
+        13
+      );
 
-      // Add click listener to map
-      mapInstanceRef.current.addListener('click', (e) => {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(mapInstanceRef.current);
+
+      // Add click listener
+      mapInstanceRef.current.on('click', async (e) => {
+        const { lat, lng } = e.latlng;
         
         setFormData(prev => ({
           ...prev,
@@ -104,37 +101,45 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           longitude: lng
         }));
 
-        // Update or create marker
+        // Remove old marker if exists
         if (markerRef.current) {
-          markerRef.current.setPosition(e.latLng);
-        } else {
-          markerRef.current = new window.google.maps.Marker({
-            position: e.latLng,
-            map: mapInstanceRef.current,
-          });
+          mapInstanceRef.current.removeLayer(markerRef.current);
         }
 
-        // Reverse geocode to get address
-        const geocoder = new window.google.maps.Geocoder();
-        geocoder.geocode({ location: e.latLng }, (results, status) => {
-          if (status === 'OK' && results[0]) {
+        // Add new marker
+        markerRef.current = window.L.marker([lat, lng]).addTo(mapInstanceRef.current);
+
+        // Reverse geocode using Nominatim
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+          );
+          const data = await response.json();
+          if (data.display_name) {
             setFormData(prev => ({
               ...prev,
-              location: results[0].formatted_address
+              location: data.display_name
             }));
           }
-        });
+        } catch (error) {
+          console.error('Geocoding error:', error);
+        }
       });
 
       // Add existing marker if coordinates exist
       if (formData.latitude && formData.longitude) {
-        markerRef.current = new window.google.maps.Marker({
-          position: { lat: formData.latitude, lng: formData.longitude },
-          map: mapInstanceRef.current,
-        });
+        markerRef.current = window.L.marker([formData.latitude, formData.longitude])
+          .addTo(mapInstanceRef.current);
       }
     }
-  }, [showMap, mapLoaded]);
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [showMap]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -172,7 +177,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
-    // Basic validation
+    // Validation
     if (!formData.dpImage) {
       setError("Display image is required");
       return;
@@ -188,14 +193,22 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
       return;
     }
 
+    if (!formData.location) {
+      setError("Location is required");
+      return;
+    }
+
+    if (!formData.description) {
+      setError("Description is required");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      // Create FormData for file uploads
       const data = new FormData();
       
-      // Append all fields
       data.append('propertyType', formData.propertyType);
       data.append('listedFor', formData.listedFor);
       data.append('price', formData.price);
@@ -210,22 +223,18 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
       data.append('kitchen', formData.kitchen);
       data.append('isBidding', formData.isBidding);
       
-      // Append display image
       data.append('dpImage', formData.dpImage);
       
-      // Append additional images
       formData.images.forEach((image) => {
         data.append('images', image);
       });
 
-      // Make API call
       const response = await api.post('/api/properties/create', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }
       });
 
-      console.log('Property created:', response.data);
       alert("Property created successfully!");
       onSubmit(response.data);
       onClose();
@@ -251,7 +260,6 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
@@ -261,7 +269,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           {/* Display Picture */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Display Picture
+              Display Picture <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -270,6 +278,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleDpImageChange}
                 className="hidden"
                 id="dpImage"
+                required
               />
               <label
                 htmlFor="dpImage"
@@ -297,7 +306,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
               >
-                <option value="" disabled>Property Type :</option>
+                <option value="" disabled>Property Type : *</option>
                 <option value="house">House</option>
                 <option value="apartment">Apartment</option>
                 <option value="room">Room</option>
@@ -312,7 +321,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
               >
-                <option value="" disabled>Listing Type :</option>
+                <option value="" disabled>Listing Type : *</option>
                 <option value="sell">Sell</option>
                 <option value="rent">Rent</option>
               </select>
@@ -342,7 +351,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           {/* Price */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price {formData.listedFor === 'rent' && <span className="text-gray-500 text-xs">(per month)</span>}
+              Price <span className="text-red-500">*</span> {formData.listedFor === 'rent' && <span className="text-gray-500 text-xs">(per month)</span>}
             </label>
             <input
               type="number"
@@ -363,7 +372,7 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           {/* Location with Map */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Location
+              Location <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-2">
               <input
@@ -407,37 +416,40 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           {/* Room Counts */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Living</label>
+              <label className="block text-sm text-gray-600 mb-1">Living <span className="text-red-500">*</span></label>
               <input
                 type="number"
                 name="living"
                 value={formData.living}
                 onChange={handleInputChange}
-                min="0"
+                min="1"
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Bed</label>
+              <label className="block text-sm text-gray-600 mb-1">Bed <span className="text-red-500">*</span></label>
               <input
                 type="number"
                 name="beds"
                 value={formData.beds}
                 onChange={handleInputChange}
-                min="0"
+                min="1"
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Kitchen</label>
+              <label className="block text-sm text-gray-600 mb-1">Kitchen <span className="text-red-500">*</span></label>
               <input
                 type="number"
                 name="kitchen"
                 value={formData.kitchen}
                 onChange={handleInputChange}
-                min="0"
+                min="1"
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -446,12 +458,13 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
+              Description <span className="text-red-500">*</span>
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleInputChange}
+              required
               rows="4"
               placeholder="Enter property description"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -460,6 +473,9 @@ export const AddPropertyDialog = ({ isOpen, onClose, onSubmit }) => {
 
           {/* Additional Images */}
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Additional Photos (Optional)
+            </label>
             <input
               type="file"
               accept="image/*"
