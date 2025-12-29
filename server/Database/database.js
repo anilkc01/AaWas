@@ -8,7 +8,7 @@ export const sequelize = new Sequelize("aawas", "postgres", "hello", {
 
 export const connection = () => {
   try {
-    sequelize.sync();
+    sequelize.sync({ alter: true });
     console.log("Database Connected Sucessfully");
   } catch (e) {
     console.log(e);
