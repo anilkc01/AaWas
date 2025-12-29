@@ -1,4 +1,4 @@
-import Property from "../models/Property.js";
+import Property from "../models/property.js";
 import { Op } from "sequelize";
 import fs from "fs";
 import path from "path";
