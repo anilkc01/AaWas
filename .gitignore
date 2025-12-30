@@ -5,8 +5,6 @@ server/node_modules/
 
 # Environment variables
 .env
-server/.env
-client/.env
 .env.local
 
 # Build
@@ -21,6 +19,8 @@ npm-debug.log*
 *.sql
 
 server/uploads
+
+server/Database/database.js
 
 # OS
 .DS_Store
