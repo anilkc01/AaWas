@@ -21,5 +21,5 @@ api.interceptors.request.use(
 export default api;
 
 
-{/*  this is trial for config check
+{/*  this is trial for config check again
 */}
