@@ -12,7 +12,16 @@ const AboutUs = () => {
         this is schanges from tekraj
       </p>
     </div>
+
+
+
+
   );
 };
 
 export default AboutUs;
+
+
+
+
+
