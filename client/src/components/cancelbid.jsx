@@ -64,21 +64,6 @@ export const CancelBidDialog = ({ isOpen, onClose, property, onCancel }) => {
             </p>
           </div>
 
-          {/* Warning Message */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-            <p className="text-[9px] text-yellow-800 font-medium mb-1">
-              ⚠️ Warning
-            </p>
-            <p className="text-[8px] text-yellow-700">
-              Cancelling will:
-            </p>
-            <ul className="list-disc list-inside text-[8px] text-yellow-700 mt-0.5 space-y-0.5">
-              <li>Close all active bids</li>
-              <li>Notify all bidders</li>
-              <li>Change property to regular listing</li>
-            </ul>
-          </div>
-
           {/* Reason (Optional) */}
           <div>
             <label className="block text-[9px] font-medium text-gray-700 mb-1">
