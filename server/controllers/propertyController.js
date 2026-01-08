@@ -303,7 +303,6 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: "Property not found" });
     }
 
-   
     let isFavourite = false;
 
     if (userId) {
@@ -326,7 +325,6 @@ export const getPropertyById = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch property" });
   }
 };
-
 
 /**
  * GET All Properties (Public - for browsing)
@@ -375,6 +373,10 @@ export const browseProperties = async (req, res) => {
         "kitchen",
         "washroom",
         "living",
+        "propertyType",
+        "listedFor",
+        "isBidding",
+        "createdAt",
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -507,4 +509,3 @@ export const reportProperty = async (req, res) => {
     res.status(500).json({ message: "Failed to report property" });
   }
 };
-
