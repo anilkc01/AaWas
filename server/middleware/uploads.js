@@ -75,4 +75,18 @@ export const uploadPropertyImages = multer({
   { name: "images", maxCount: 10 },
 ]);
 
+/**
+ * KYC upload middleware
+ * Temporarily stores in uploads/kyc (temp location)
+ * Files will be moved to user-specific folders after KYC submission
+ */
+export const uploadKycImages = multer({
+  storage: storage("kyc"),
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).fields([
+  { name: "documentImage", maxCount: 1 },
+  { name: "image", maxCount: 1 },
+]);
+
 export default upload;

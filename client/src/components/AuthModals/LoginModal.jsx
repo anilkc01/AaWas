@@ -20,10 +20,13 @@ export default function LoginModal({ onLoginSuccess }) {
     password: "",
   });
 
+  const [formError, setFormError] = useState("");
+
   const handleLogin = async () => {
     try {
       setLoading(true);
       setErrors({ email: "", password: "" });
+      setFormError("");
 
       console.log("Attempting login with:", { email, password, rememberMe });
 
@@ -52,6 +55,13 @@ export default function LoginModal({ onLoginSuccess }) {
     } catch (err) {
       if (err.response) {
         const { status, data } = err.response;
+
+        if (status === 403 && data.error === "ACCOUNT_SUSPENDED") {
+          setFormError(
+            "Your account has been suspended. Please contact our office."
+          );
+          return;
+        }
 
         if (status === 401 && data.error === "EMAIL_NOT_FOUND") {
           setErrors({
@@ -103,6 +113,10 @@ export default function LoginModal({ onLoginSuccess }) {
       <h2 className="text-[11px] font-semibold text-center mb-2">
         Login to your account
       </h2>
+
+      {formError && (
+        <p className="text-[8px] text-red-600 text-center mb-2">{formError}</p>
+      )}
 
       {/* EMAIL */}
       <input

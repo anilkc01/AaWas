@@ -81,6 +81,13 @@ export const loginUser = async (req, res) => {
       });
     }
 
+    //  ACCOUNT SUSPENDED CHECK
+    if (user.status === "suspended") {
+      return res.status(403).json({
+        error: "ACCOUNT_SUSPENDED",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -88,8 +95,6 @@ export const loginUser = async (req, res) => {
         error: "INVALID_PASSWORD",
       });
     }
-
-   
 
     const token = generateToken({ id: user.id }, remember);
 
@@ -109,12 +114,16 @@ export const loginUser = async (req, res) => {
   }
 };
 
+
 export const verifyToken = (req, res) => {
   res.status(200).json({
     valid: true,
     user: {
       id: req.user.id,
       email: req.user.email,
+      role: req.user.role,      
+      status: req.user.status, 
     },
   });
 };
+

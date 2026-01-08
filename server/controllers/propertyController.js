@@ -2,6 +2,8 @@ import Property from "../models/property.js";
 import { Op } from "sequelize";
 import fs from "fs";
 import path from "path";
+import User from "../models/User.js";
+import Kyc from "../models/Kyc.js";
 
 /**
  * Helper: Ensure property directory exists
@@ -262,9 +264,24 @@ export const getMyProperties = async (req, res) => {
  * GET Single Property
  */
 export const getPropertyById = async (req, res) => {
+  
   try {
     const { id } = req.params;
-    const property = await Property.findByPk(id);
+
+    const property = await Property.findByPk(id, {
+      include: [
+        {
+          model: User,
+          attributes: ["id", "fullName"],
+          include: [
+            {
+              model: Kyc,
+              attributes: ["image"],
+            },
+          ],
+        },
+      ],
+    });
 
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
@@ -300,6 +317,40 @@ export const getAllProperties = async (req, res) => {
   } catch (error) {
     console.error("Get all properties error:", error);
     res.status(500).json({ message: "Failed to fetch properties" });
+  }
+};
+
+
+
+/**
+ * GET All Properties (Public - for browsing)
+ */
+export const browseProperties = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const properties = await Property.findAll({
+      where: {
+        userId: { [Op.ne]: userId },
+        status: "available",
+      },
+      attributes: [
+        "id",
+        "dpImage",
+        "location",
+        "price",
+        "beds",
+        "kitchen",
+        "washroom",
+        "living",
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json(properties);
+  } catch (error) {
+    console.error("Error fetching properties:", error);
+    res.status(500).json({ error: "Failed to fetch properties" });
   }
 };
 

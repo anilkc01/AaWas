@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../Database/database.js";
 
-
 const User = sequelize.define(
   "User",
   {
@@ -32,12 +31,23 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+
+    role: {
+      type: DataTypes.ENUM("user", "admin"),
+      allowNull: false,
+      defaultValue: "user",
+    },
+
+    status: {
+      type: DataTypes.ENUM("active", "suspended"),
+      allowNull: false,
+      defaultValue: "active",
+    },
   },
   {
     tableName: "users",
     timestamps: true,
   }
 );
-
 
 export default User;

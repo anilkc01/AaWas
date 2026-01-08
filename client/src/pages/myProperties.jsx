@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 
 import KycForm from "../components/Kyc/kycForm";
-import PropertyCard from "../components/property/PropertyCard";
-import AddPropertyCard from "../components/property/AddPropertyCard";
-import { AddPropertyDialog } from "../components/property/AddPropertyDialog";
+import PropertyCard from "../components/property/Owner/MyPropertyCard";
+import AddPropertyCard from "../components/property/Owner/AddPropertyCard";
+import { AddPropertyDialog } from "../components/property/Owner/AddPropertyDialog";
 
 export default function MyProperties() {
   const [kycStatus, setKycStatus] = useState("loading");
