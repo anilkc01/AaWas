@@ -42,12 +42,7 @@ router.post("/report-property", (req, res) => {
 --------------------------------------------------
 GET /admin/reported-properties
 */
-router.get("/admin/reported-properties", (req, res) => {
-  res.status(200).json({
-    totalReports: reportedProperties.length,
-    reports: reportedProperties,
-  });
-});
+
 
 /*
 --------------------------------------------------
