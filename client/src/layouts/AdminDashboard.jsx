@@ -1,9 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 
 export default function AdminDashboard({ onLogout }) {
-  const [view, setView] = useState("browse"); // "browse" | "my"
+ const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    
+    if (location.state?.message) {
+      toast.success(location.state.message, {id:"loggedd in"});
+      
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   return (
     <div className="flex h-screen">

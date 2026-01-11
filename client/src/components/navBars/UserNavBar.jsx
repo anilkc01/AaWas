@@ -56,7 +56,6 @@ export default function Navbar({ onLogout, view, setView }) {
     if (kycData?.image) {
       return `${api.defaults.baseURL}/${kycData.image}`;
     } else {
-      console.log("no kyc image");
     }
     return null;
   };
