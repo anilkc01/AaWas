@@ -133,7 +133,7 @@ export default function BrowseProperties() {
 
   return (
     <>
-      <div className="pt-16 w-full min-h-screen bg-gray-50">
+      <div className="pt-5 w-full min-h-screen bg-gray-50">
         <div className="p-4 w-full mx-auto">
           <div className="mb-6">
             <h1 className="text-2xl font-bold mb-4">Browse Properties</h1>

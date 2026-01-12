@@ -1,8 +1,14 @@
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "./api/axios";
+
+import GuestPage from "./layouts/guestWelcome";
 import UserDashboard from "./layouts/UserDashboard";
 import AdminDashboard from "./layouts/AdminDashboard";
-import GuestPage from "./layouts/guestWelcome";
+
+import BrowseProperties from "./pages/browseProperties";
+import MyProperties from "./pages/myProperties";
+import KycForm from "./pages/kyc";
 
 export default function AppContent() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -23,12 +29,9 @@ export default function AppContent() {
 
     try {
       const res = await api.get("/api/auth/verify");
-
       setAuthorized(true);
-      setRole(res.data.user.role); // 🔐 FROM BACKEND
+      setRole(res.data.user.role);
     } catch {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
       setAuthorized(false);
       setRole(null);
     } finally {
@@ -42,14 +45,33 @@ export default function AppContent() {
 
   if (!authChecked) return null;
 
-  if (!authorized) {
-    return <GuestPage onLoginSuccess={checkAuth} />;
-  }
+  return (
+    <Routes>
+      {/* GUEST */}
+      {!authorized && (
+        <Route
+          path="*"
+          element={<GuestPage onLoginSuccess={checkAuth} />}
+        />
+      )}
 
+      {/* ADMIN */}
+      {authorized && role === "admin" && (
+        <Route
+          path="/*"
+          element={<AdminDashboard onLogout={checkAuth} />}
+        />
+      )}
 
-  if (role === "admin") {
-    return <AdminDashboard onLogout={checkAuth} />;
-  }
-
-  return <UserDashboard onLogout={checkAuth} />;
+      {/* USER */}
+      {authorized && role === "user" && (
+        <Route path="/" element={<UserDashboard onLogout={checkAuth} />}>
+          <Route index element={<BrowseProperties />} />
+          <Route path="my" element={<MyProperties />} />
+          <Route path="kyc" element={<KycForm />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Route>
+      )}
+    </Routes>
+  );
 }

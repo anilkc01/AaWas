@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../../api/axios";
+import { KycSchema } from "./schema.kyc"
 
 export default function KycForm({ status, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -38,6 +39,18 @@ export default function KycForm({ status, onSuccess }) {
   };
 
   const handleSubmit = async () => {
+    setError("");
+
+    // ZOD FIELD VALIDATION
+    const result = KycSchema.safeParse(formData);
+
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message;
+      setError(firstError || "Invalid form data");
+      return;
+    }
+
+    // FILE VALIDATION (kept exactly same logic)
     if (!profileImage) {
       setError("Profile image is required");
       return;
@@ -48,14 +61,8 @@ export default function KycForm({ status, onSuccess }) {
       return;
     }
 
-    if (!formData.fullName || !formData.address || !formData.email || !formData.phone) {
-      setError("All fields are required");
-      return;
-    }
-
     try {
       setLoading(true);
-      setError("");
 
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) =>
@@ -80,7 +87,9 @@ export default function KycForm({ status, onSuccess }) {
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-50 py-6">
       <div className="w-full max-w-sm p-5 border rounded-lg bg-white shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-center">KYC Verification</h2>
+        <h2 className="text-lg font-semibold mb-4 text-center">
+          KYC Verification
+        </h2>
 
         {/* STATUS MESSAGES */}
         {status === "pending" && (
@@ -101,7 +110,9 @@ export default function KycForm({ status, onSuccess }) {
           </p>
         )}
 
-        {error && <p className="text-red-600 mb-3 text-sm text-center">{error}</p>}
+        {error && (
+          <p className="text-red-600 mb-3 text-sm text-center">{error}</p>
+        )}
 
         {/* SHOW FORM ONLY WHEN ALLOWED */}
         {(status === "not_submitted" || status === "rejected") && (

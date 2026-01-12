@@ -3,39 +3,72 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
+import { LoginSchema } from "./schema.login";
 
 export default function LoginModal({ onLoginSuccess }) {
   const navigate = useNavigate();
   const location = useLocation();
   const closeModal = () => navigate("/");
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+
   const [formError, setFormError] = useState("");
 
   useEffect(() => {
-    
     if (location.state?.message) {
-      toast.success(location.state.message, {id:"registration"});
-      
+      toast.success(location.state.message, { id: "registration" });
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
 
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      setErrors({ email: "", password: "" });
-      setFormError("");
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
+  const handleLogin = async () => {
+    setLoading(true);
+    setErrors({ email: "", password: "" });
+    setFormError("");
+
+    const result = LoginSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+        if (!field) return;
+        fieldErrors[field] = issue.message;
+      });
+
+      setErrors((prev) => ({
+        ...prev,
+        ...fieldErrors,
+      }));
+
+      setLoading(false);
+      return;
+    }
+
+    try {
       const res = await api.post("/api/auth/login", {
-        email,
-        password,
+        ...formData,
         rememberMe,
       });
 
@@ -50,10 +83,18 @@ export default function LoginModal({ onLoginSuccess }) {
       }
 
       onLoginSuccess?.();
-      navigate("/");
-      navigate("/", { state: { message: 'Welcome !' } })
+      navigate("/", { state: { message: "Welcome !" } });
     } catch (err) {
-      // unchanged error handling
+      if (err.response?.data?.errors) {
+        setErrors((prev) => ({
+          ...prev,
+          ...err.response.data.errors,
+        }));
+      } else if (err.response?.data?.message) {
+       toast.error(err.response.data.message, {id : "aaa"})
+      } else {
+        setFormError("Network error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -88,7 +129,6 @@ export default function LoginModal({ onLoginSuccess }) {
       <h2 className="text-[16px] font-semibold text-center mt-1">
         Login to your account
       </h2>
-      
 
       {formError && (
         <p className="text-[12px] text-red-600 text-center">{formError}</p>
@@ -98,9 +138,11 @@ export default function LoginModal({ onLoginSuccess }) {
       <div className="flex flex-col gap-1">
         <input
           type="email"
+          name="email"
+          maxLength={30}
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
           className={`w-full px-3 py-2 text-[14px] bg-transparent border-b focus:outline-none ${
             errors.email
               ? "border-red-500"
@@ -117,9 +159,10 @@ export default function LoginModal({ onLoginSuccess }) {
         <div className="relative flex items-center">
           <input
             type={showPassword ? "text" : "password"}
+            name="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             className={`w-full px-3 py-2 pr-10 text-[14px] bg-transparent border-b focus:outline-none ${
               errors.password
                 ? "border-red-500"
@@ -149,6 +192,7 @@ export default function LoginModal({ onLoginSuccess }) {
       <div className="flex items-center gap-2 pt-1">
         <input
           type="checkbox"
+          
           id="rememberMe"
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}

@@ -34,7 +34,7 @@ const Kyc = sequelize.define("Kyc", {
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: false,  // Set to true if optional
+    allowNull: false,
     defaultValue: " "
   },
   status: {

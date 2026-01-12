@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
-import KycForm from "../components/Kyc/kycForm";
 import PropertyCard from "../components/property/Owner/MyPropertyCard";
 import AddPropertyCard from "../components/property/Owner/AddPropertyCard";
 import { AddPropertyDialog } from "../components/property/Owner/AddPropertyDialog";
 
 export default function MyProperties() {
+  const navigate = useNavigate();
+
   const [kycStatus, setKycStatus] = useState("loading");
   const [properties, setProperties] = useState([]);
 
@@ -17,10 +19,16 @@ export default function MyProperties() {
   const fetchKycStatus = async () => {
     try {
       const res = await api.get("/api/kyc/status");
-      setKycStatus(res.data.status);
+
+      if (res.data.status !== "verified") {
+        navigate("/kyc", { replace: true });
+        return;
+      }
+
+      setKycStatus("verified");
     } catch (err) {
       console.error(err);
-      setKycStatus("error");
+      navigate("/kyc", { replace: true });
     }
   };
 
@@ -45,7 +53,6 @@ export default function MyProperties() {
   }, [kycStatus]);
 
   /* ---------------- HANDLERS ---------------- */
-
   const handleAdd = () => {
     setEditingProperty(null);
     setOpenDialog(true);
@@ -95,37 +102,29 @@ export default function MyProperties() {
     <div className="pt-5 p-4">
       <h1 className="text-2xl font-bold mb-6">My Properties</h1>
 
-      {kycStatus !== "verified" && (
-        <KycForm status={kycStatus} onSuccess={fetchKycStatus} />
-      )}
-
-      {kycStatus === "verified" && (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onEdit={handleEdit}
-                onDelete={(p) => handleDelete(p.id)}
-                onDisable={(p) => handleDisable(p.id)}
-              />
-            ))}
-
-            <AddPropertyCard onClick={handleAdd} />
-          </div>
-
-          <AddPropertyDialog
-            isOpen={openDialog}
-            property={editingProperty}
-            onClose={() => {
-              setOpenDialog(false);
-              setEditingProperty(null);
-            }}
-            onSubmit={handlePropertySubmit}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+        {properties.map((property) => (
+          <PropertyCard
+            key={property.id}
+            property={property}
+            onEdit={handleEdit}
+            onDelete={(p) => handleDelete(p.id)}
+            onDisable={(p) => handleDisable(p.id)}
           />
-        </>
-      )}
+        ))}
+
+        <AddPropertyCard onClick={handleAdd} />
+      </div>
+
+      <AddPropertyDialog
+        isOpen={openDialog}
+        property={editingProperty}
+        onClose={() => {
+          setOpenDialog(false);
+          setEditingProperty(null);
+        }}
+        onSubmit={handlePropertySubmit}
+      />
     </div>
   );
 }

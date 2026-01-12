@@ -3,6 +3,7 @@ import { connection } from "./Database/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import kycRoutes from "./routes/kycRoutes.js";
 import propertyRoutes from "./routes/propertyRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/kyc", kycRoutes);
 
 app.use("/api/properties", propertyRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 
 app.listen(5001,  "0.0.0.0", () => {
