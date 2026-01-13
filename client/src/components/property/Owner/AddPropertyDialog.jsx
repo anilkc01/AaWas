@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Upload, Plus, MapPin } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../../api/axios';
 
 const API_BASE = process.env.REACT_APP_API_BASE;
 

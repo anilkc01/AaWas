@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import AppContent from "./AppContent";
 import SplashScreen from "./layouts/SplashScreen";
-import Navbar from "./components/navBars/NavBar1";
-import Welcome from "./pages/welcome";
 import "leaflet/dist/leaflet.css";
 
 

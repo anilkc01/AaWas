@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "./api/axios";
-import DashboardPage from "./layouts/UserDashboard";
+import UserDashboard from "./layouts/UserDashboard";
+import AdminDashboard from "./layouts/AdminDashboard";
 import GuestPage from "./layouts/guestWelcome";
-import { useLocation } from "react-router-dom";
-import Navbar from "./components/navBars/NavBar1";
-import AboutUs from "./pages/aboutUs";
-import Welcome from "./pages/welcome";
-
-
 
 export default function AppContent() {
-   
   const [authChecked, setAuthChecked] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [role, setRole] = useState(null);
 
   const checkAuth = async () => {
     const token =
@@ -21,17 +16,21 @@ export default function AppContent() {
 
     if (!token) {
       setAuthorized(false);
+      setRole(null);
       setAuthChecked(true);
       return;
     }
 
     try {
-      await api.get("/api/auth/verify");
+      const res = await api.get("/api/auth/verify");
+
       setAuthorized(true);
+      setRole(res.data.user.role); // 🔐 FROM BACKEND
     } catch {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       setAuthorized(false);
+      setRole(null);
     } finally {
       setAuthChecked(true);
     }
@@ -43,11 +42,14 @@ export default function AppContent() {
 
   if (!authChecked) return null;
 
-  return authorized
-    ? <DashboardPage  onLogout={() => setAuthorized(false)} />
-    : <GuestPage onLoginSuccess={checkAuth} />;
-
-  
+  if (!authorized) {
+    return <GuestPage onLoginSuccess={checkAuth} />;
+  }
 
 
+  if (role === "admin") {
+    return <AdminDashboard onLogout={checkAuth} />;
+  }
+
+  return <UserDashboard onLogout={checkAuth} />;
 }
