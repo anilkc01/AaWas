@@ -500,3 +500,9 @@ export default function OwnerDetailsRatings({ ownerId }) {
     </div>
   );
 }
+
+
+
+
+
+
