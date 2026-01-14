@@ -26,7 +26,7 @@ export default function PropertyCard({
     location ? location.split(",")[0].trim() : "Unknown";
 
   return (
-    <div className="relative bg-white rounded-xl shadow hover:shadow-xl transition overflow-hidden group">
+    <div className="relative h-full  bg-white rounded-xl shadow hover:shadow-xl transition overflow-hidden group">
       <button
         onClick={(e) => {
           e.stopPropagation();

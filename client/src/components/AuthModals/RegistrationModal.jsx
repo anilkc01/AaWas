@@ -2,10 +2,7 @@ import { X, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/axios";
-import {
-  RegistrationFieldsSchema,
-  RegistrationSchema,
-} from "./schema.registration";
+import { RegistrationSchema } from "./schema.registration";
 
 export default function RegisterModal() {
   const navigate = useNavigate();
@@ -31,79 +28,46 @@ export default function RegisterModal() {
     rePassword: "",
   });
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
-
-  if (name === "phone") {
-    const onlyNums = value.replace(/[^0-9]/g, "");
-    const limitedVal = onlyNums.slice(0, 10);
-
-    setFormData({
-      ...formData,
-      [name]: limitedVal,
-    });
-  } else {
-    // Logic for other fields
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  }
-};
-
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const onlyNums = value.replace(/[^0-9]/g, "");
+      const limitedVal = onlyNums.slice(0, 10);
+      setFormData({ ...formData, [name]: limitedVal });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
-
-    // clear previous errors
     setErrors({
-      fullName: "",
-      email: "",
-      phone: "",
-      password: "",
-      rePassword: "",
+      fullName: "", email: "", phone: "", password: "", rePassword: "",
     });
 
     const result = RegistrationSchema.safeParse(formData);
 
     if (!result.success) {
       const fieldErrors = {};
-
       result.error.issues.forEach((issue) => {
         const field = issue.path[0];
         if (!field) return;
-
-        if (!fieldErrors[field]) {
-          fieldErrors[field] = [];
-        }
-
+        if (!fieldErrors[field]) fieldErrors[field] = [];
         fieldErrors[field].push(issue.message);
       });
-
-      setErrors((prev) => ({
-        ...prev,
-        ...fieldErrors,
-      }));
-
+      setErrors((prev) => ({ ...prev, ...fieldErrors }));
       setLoading(false);
       return;
     }
 
     try {
       await api.post("/api/auth/register", formData);
-      navigate('/login', { state: { message: 'Registration successful! Please log in.' } })
+      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
     } catch (err) {
       if (err.response?.data?.errors) {
-        // backend field-level validation
-        setErrors((prev) => ({
-          ...prev,
-          ...err.response.data.errors,
-        }));
+        setErrors((prev) => ({ ...prev, ...err.response.data.errors }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          rePassword: "Network error. Please try again.",
-        }));
+        setErrors((prev) => ({ ...prev, rePassword: "Network error. Please try again." }));
       }
     } finally {
       setLoading(false);
@@ -111,154 +75,140 @@ const handleChange = (e) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-[999]">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[999]">
       <div
         className="
-          relative bg-white rounded-2xl shadow-xl
-          w-[360px] max-w-[92vw]
-          p-6 box-border
-          flex flex-col gap-3
+          relative bg-white rounded-2xl shadow-2xl
+          w-[400px] max-w-[95vw]
+          p-8 box-border
+          flex flex-col gap-5
         "
       >
         {/* Close */}
         <button
           onClick={closeModal}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black"
+          className="absolute top-5 right-5 text-gray-500 hover:text-black transition-colors"
         >
-          <X size={18} />
+          <X size={24} />
         </button>
 
         {/* Logo */}
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center">
           <img
             src="/logoRound.png"
-            className="w-[72px] h-[72px] rounded-full border shadow-sm object-cover"
+            className="w-[84px] h-[84px] rounded-full border-2 shadow-md object-cover"
             alt="logo"
           />
         </div>
 
-        <h2 className="text-[16px] font-semibold text-center">
+        <h2 className="text-2xl font-bold text-center text-gray-800">
           Create your account
         </h2>
 
-        {/* Full Name */}
-        <div className="flex flex-col gap-1">
-          <input
-            type="text"
-            name="fullName"
-            maxLength={30}
-            placeholder="Full Name"
-            value={formData.fullName}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 text-[14px] bg-transparent border-b focus:outline-none ${
-              errors.fullName
-                ? "border-red-500"
-                : "border-gray-300 focus:border-[#B59353]"
-            }`}
-          />
-          {errors.fullName && (
-            <p className="text-[12px] text-red-500">{errors.fullName}</p>
-          )}
-        </div>
-
-        {/* Email */}
-        <div className="flex flex-col gap-1">
-          <input
-            type="email"
-            name="email"
-            maxLength={30}
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 text-[14px] bg-transparent border-b focus:outline-none ${
-              errors.email
-                ? "border-red-500"
-                : "border-gray-300 focus:border-[#B59353]"
-            }`}
-          />
-          {errors.email && (
-            <p className="text-[12px] text-red-500">{errors.email}</p>
-          )}
-        </div>
-
-        {/* Phone */}
-        <div className="flex flex-col gap-1">
-          <input
-            type="tel"
-            name="phone"
-            maxLength={10} 
-            placeholder="Phone Number"
-            value={formData.phone}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 text-[14px] bg-transparent border-b focus:outline-none ${
-              errors.phone
-                ? "border-red-500"
-                : "border-gray-300 focus:border-[#B59353]"
-            }`}
-          />
-          {errors.phone && (
-            <p className="text-[12px] text-red-500">{errors.phone}</p>
-          )}
-        </div>
-
-        {/* Password */}
-        <div className="flex flex-col gap-1">
-          <div className="relative flex items-center">
+        {/* Form Container with slightly more gap */}
+        <div className="flex flex-col gap-4">
+          
+          {/* Full Name */}
+          <div className="flex flex-col gap-1">
             <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              value={formData.password}
+              type="text"
+              name="fullName"
+              maxLength={30}
+              placeholder="Full Name"
+              value={formData.fullName}
               onChange={handleChange}
-              className={`w-full px-3 py-2 pr-10 text-[14px] bg-transparent border-b focus:outline-none ${
-                errors.password
-                  ? "border-red-500"
-                  : "border-gray-300 focus:border-[#B59353]"
+              className={`w-full px-4 py-3 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
+                errors.fullName ? "border-red-500" : "border-gray-200 focus:border-[#B59353]"
               }`}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 text-gray-600"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+            {errors.fullName && <p className="text-[13px] font-bold text-red-500 mt-1">{errors.fullName}</p>}
           </div>
-          {errors.password && (
-            <ul className="text-[8px] text-red-500 mb-1">
-              {errors.password.map((err, i) => (
-                <li key={i}>• {err}</li>
-              ))}
-            </ul>
-          )}
-        </div>
 
-        {/* Re-password */}
-        <div className="flex flex-col gap-1">
-          <div className="relative flex items-center">
+          {/* Email */}
+          <div className="flex flex-col gap-1">
             <input
-              type={showRePassword ? "text" : "password"}
-              name="rePassword"
-              placeholder="Re-enter Password"
-              value={formData.rePassword}
+              type="email"
+              name="email"
+              maxLength={30}
+              placeholder="Email Address"
+              value={formData.email}
               onChange={handleChange}
-              className={`w-full px-3 py-2 pr-10 text-[14px] bg-transparent border-b focus:outline-none ${
-                errors.rePassword
-                  ? "border-red-500"
-                  : "border-gray-300 focus:border-[#B59353]"
+              className={`w-full px-4 py-3 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
+                errors.email ? "border-red-500" : "border-gray-200 focus:border-[#B59353]"
               }`}
             />
-            <button
-              type="button"
-              onClick={() => setShowRePassword(!showRePassword)}
-              className="absolute right-3 text-gray-600"
-            >
-              {showRePassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+            {errors.email && <p className="text-[13px] font-bold text-red-500 mt-1">{errors.email}</p>}
           </div>
-          {errors.rePassword && (
-            <p className="text-[12px] text-red-500">{errors.rePassword}</p>
-          )}
+
+          {/* Phone */}
+          <div className="flex flex-col gap-1">
+            <input
+              type="tel"
+              name="phone"
+              maxLength={10} 
+              placeholder="Phone Number (10 digits)"
+              value={formData.phone}
+              onChange={handleChange}
+              className={`w-full px-4 py-3 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
+                errors.phone ? "border-red-500" : "border-gray-200 focus:border-[#B59353]"
+              }`}
+            />
+            {errors.phone && <p className="text-[13px] font-bold text-red-500 mt-1">{errors.phone}</p>}
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-1">
+            <div className="relative flex items-center">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 pr-12 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
+                  errors.password ? "border-red-500" : "border-gray-200 focus:border-[#B59353]"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 text-gray-500"
+              >
+                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+              </button>
+            </div>
+            {errors.password && (
+              <ul className="text-[11px] font-bold text-red-500 mt-1 space-y-0.5">
+                {errors.password.map((err, i) => (
+                  <li key={i}>• {err}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Re-password */}
+          <div className="flex flex-col gap-1">
+            <div className="relative flex items-center">
+              <input
+                type={showRePassword ? "text" : "password"}
+                name="rePassword"
+                placeholder="Confirm Password"
+                value={formData.rePassword}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 pr-12 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
+                  errors.rePassword ? "border-red-500" : "border-gray-200 focus:border-[#B59353]"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowRePassword(!showRePassword)}
+                className="absolute right-4 text-gray-500"
+              >
+                {showRePassword ? <EyeOff size={22} /> : <Eye size={22} />}
+              </button>
+            </div>
+            {errors.rePassword && <p className="text-[13px] font-bold text-red-500 mt-1">{errors.rePassword}</p>}
+          </div>
         </div>
 
         {/* Register button */}
@@ -266,17 +216,17 @@ const handleChange = (e) => {
           onClick={handleSubmit}
           disabled={loading}
           className="w-full bg-[#B59353] hover:bg-[#a68546]
-            text-white py-2 rounded-full text-[14px]
-            transition disabled:opacity-50"
+            text-white py-4 rounded-xl text-[18px] font-bold
+            transition-all transform active:scale-[0.98] shadow-lg disabled:opacity-50 mt-2"
         >
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Creating Account..." : "REGISTER"}
         </button>
 
-        <p className="text-[12px] text-center text-gray-600">
+        <p className="text-[14px] font-medium text-center text-gray-600">
           Already have an account?
           <span
             onClick={() => navigate("/login")}
-            className="text-[#B59353] ml-1 cursor-pointer hover:underline"
+            className="text-[#B59353] font-bold ml-2 cursor-pointer hover:underline"
           >
             Login here
           </span>

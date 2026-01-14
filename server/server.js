@@ -1,6 +1,7 @@
 import express from "express";
 import { connection } from "./Database/database.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import kycRoutes from "./routes/kycRoutes.js";
 import propertyRoutes from "./routes/propertyRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
@@ -29,6 +30,7 @@ app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/kyc", kycRoutes);
 
 app.use("/api/properties", propertyRoutes);

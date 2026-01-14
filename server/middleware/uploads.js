@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-/**
+/*
  * Create folder if it doesn't exist
  */
 const ensureDir = (dir) => {
@@ -11,7 +11,7 @@ const ensureDir = (dir) => {
   }
 };
 
-/**
+/*
  * Multer storage factory
  */
 const storage = (folder) =>
@@ -28,7 +28,7 @@ const storage = (folder) =>
     },
   });
 
-/**
+/*
  * File filter (images only)
  */
 const fileFilter = (req, file, cb) => {
@@ -39,7 +39,7 @@ const fileFilter = (req, file, cb) => {
   else cb(new Error("Only image files are allowed"));
 };
 
-/**
+/*
  * Reusable upload factory
  */
 const upload = (folder, options = {}) => {
@@ -61,7 +61,7 @@ const upload = (folder, options = {}) => {
     : multerUpload.single(field);
 };
 
-/**
+/*
  * Property images upload middleware
  * Temporarily stores in uploads/properties (temp location)
  * Files will be moved to property-specific folders after property creation
@@ -75,7 +75,7 @@ export const uploadPropertyImages = multer({
   { name: "images", maxCount: 10 },
 ]);
 
-/**
+/*
  * KYC upload middleware
  * Temporarily stores in uploads/kyc (temp location)
  * Files will be moved to user-specific folders after KYC submission

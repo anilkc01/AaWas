@@ -4,7 +4,7 @@ export default function AddPropertyCard({ onClick }) {
   return (
     <div
       onClick={onClick}
-      className="border-2 border-dashed border-gray-300 rounded-xl
+      className="border-2 h-full border-dashed border-gray-300 rounded-xl
                  w-full min-h-[180px]
                  flex flex-col items-center justify-center
                  cursor-pointer hover:bg-gray-50 transition"
