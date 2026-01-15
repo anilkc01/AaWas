@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Search, X, ArrowUpDown, Filter, Edit, Key, LogOut } from "lucide-react";
-import PropertyDetailCard from "../components/property/User/PropertyDetailCard";
-import UserPropertyCard from "../components/property/User/UserPropertyCard";
-import api from "../api/axios";
+import PropertyDetailCard from "../../components/property/User/PropertyDetailCard";
+import UserPropertyCard from "../../components/property/User/UserPropertyCard";
+import api from "../../api/axios";
 
 export default function BrowseProperties() {
   const [properties, setProperties] = useState([]);
