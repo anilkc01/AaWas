@@ -10,13 +10,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import 'dotenv/config';
 
 
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000", // React dev server
+  origin: "*", // React dev server
 }));
 
 connection();
@@ -34,6 +33,6 @@ app.use("/api/kyc", kycRoutes);
 app.use("/api/properties", propertyRoutes);
 
 
-app.listen(5001, () => {
+app.listen(5001,  "0.0.0.0", () => {
   console.log("Server is running on port 5001");
 });
