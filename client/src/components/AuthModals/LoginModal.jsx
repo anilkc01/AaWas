@@ -50,18 +50,12 @@ export default function LoginModal({ onLoginSuccess }) {
 
     if (!result.success) {
       const fieldErrors = {};
-
       result.error.issues.forEach((issue) => {
         const field = issue.path[0];
         if (!field) return;
         fieldErrors[field] = issue.message;
       });
-
-      setErrors((prev) => ({
-        ...prev,
-        ...fieldErrors,
-      }));
-
+      setErrors((prev) => ({ ...prev, ...fieldErrors }));
       setLoading(false);
       return;
     }
@@ -86,12 +80,9 @@ export default function LoginModal({ onLoginSuccess }) {
       navigate("/", { state: { message: "Welcome !" } });
     } catch (err) {
       if (err.response?.data?.errors) {
-        setErrors((prev) => ({
-          ...prev,
-          ...err.response.data.errors,
-        }));
+        setErrors((prev) => ({ ...prev, ...err.response.data.errors }));
       } else if (err.response?.data?.message) {
-       toast.error(err.response.data.message, {id : "aaa"})
+        toast.error(err.response.data.message, { id: "aaa" });
       } else {
         setFormError("Network error. Please try again.");
       }
@@ -103,124 +94,128 @@ export default function LoginModal({ onLoginSuccess }) {
   return (
     <div
       className="
-        relative bg-white rounded-2xl shadow-xl
-        w-[320px] max-w-[92vw]
-        p-6 box-border
-        flex flex-col gap-3
+        relative bg-white rounded-2xl shadow-2xl
+        w-[400px] max-w-[95vw]
+        p-8 box-border
+        flex flex-col gap-5
       "
     >
       {/* Close */}
       <button
         onClick={closeModal}
-        className="absolute top-4 right-4 text-gray-500 hover:text-black"
+        className="absolute top-5 right-5 text-gray-500 hover:text-black transition-colors"
       >
-        <X size={18} />
+        <X size={24} />
       </button>
 
       {/* Logo */}
-      <div className="flex justify-center pt-2">
+      <div className="flex justify-center">
         <img
           src="/logoRound.png"
-          className="w-[72px] h-[72px] rounded-full border shadow-sm"
+          className="w-[84px] h-[84px] rounded-full border-2 shadow-md"
           alt="logo"
         />
       </div>
 
-      <h2 className="text-[16px] font-semibold text-center mt-1">
+      <h2 className="text-2xl font-bold text-center text-gray-800">
         Login to your account
       </h2>
 
       {formError && (
-        <p className="text-[12px] text-red-600 text-center">{formError}</p>
+        <p className="text-[14px] font-bold text-red-600 text-center bg-red-50 p-2 rounded">
+          {formError}
+        </p>
       )}
 
       {/* Email */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
+        <label className="text-[14px] font-bold text-gray-700 ml-1">Email Address</label>
         <input
           type="email"
           name="email"
           maxLength={30}
-          placeholder="Email"
+          placeholder="Enter your email"
           value={formData.email}
           onChange={handleChange}
-          className={`w-full px-3 py-2 text-[14px] bg-transparent border-b focus:outline-none ${
+          className={`w-full px-4 py-3 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
             errors.email
               ? "border-red-500"
-              : "border-gray-300 focus:border-[#B59353]"
+              : "border-gray-200 focus:border-[#B59353]"
           }`}
         />
         {errors.email && (
-          <p className="text-[12px] text-red-500">{errors.email}</p>
+          <p className="text-[13px] font-bold text-red-500 mt-1">{errors.email}</p>
         )}
       </div>
 
       {/* Password */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
+        <label className="text-[14px] font-bold text-gray-700 ml-1">Password</label>
         <div className="relative flex items-center">
           <input
             type={showPassword ? "text" : "password"}
             name="password"
-            placeholder="Password"
+            placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
-            className={`w-full px-3 py-2 pr-10 text-[14px] bg-transparent border-b focus:outline-none ${
+            className={`w-full px-4 py-3 pr-12 text-[16px] font-medium bg-gray-50 border-b-2 focus:outline-none transition-all ${
               errors.password
                 ? "border-red-500"
-                : "border-gray-300 focus:border-[#B59353]"
+                : "border-gray-200 focus:border-[#B59353]"
             }`}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 text-gray-600"
+            className="absolute right-4 text-gray-500 hover:text-[#B59353]"
           >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
           </button>
         </div>
         {errors.password && (
-          <p className="text-[12px] text-red-500">{errors.password}</p>
+          <p className="text-[13px] font-bold text-red-500 mt-1">{errors.password}</p>
         )}
       </div>
 
-      <p
-        onClick={() => navigate("/forgot-password")}
-        className="text-[12px] text-[#B59353] cursor-pointer hover:underline text-right"
-      >
-        Forgot password?
-      </p>
-
-      <div className="flex items-center gap-2 pt-1">
-        <input
-          type="checkbox"
-          
-          id="rememberMe"
-          checked={rememberMe}
-          onChange={(e) => setRememberMe(e.target.checked)}
-          className="w-4 h-4 cursor-pointer"
-        />
-        <label
-          htmlFor="rememberMe"
-          className="text-[12px] text-gray-600 cursor-pointer"
+      <div className="flex justify-between items-center px-1">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="rememberMe"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="w-5 h-5 cursor-pointer accent-[#B59353]"
+          />
+          <label
+            htmlFor="rememberMe"
+            className="text-[14px] font-bold text-gray-600 cursor-pointer"
+          >
+            Remember me
+          </label>
+        </div>
+        <p
+          onClick={() => navigate("/forgot-password")}
+          className="text-[14px] font-bold text-[#B59353] cursor-pointer hover:underline"
         >
-          Remember me
-        </label>
+          Forgot password?
+        </p>
       </div>
 
       <button
         onClick={handleLogin}
         disabled={loading}
         className="w-full bg-[#B59353] hover:bg-[#a68546]
-          text-white py-2 rounded-full text-[14px]
-          transition disabled:opacity-50"
+          text-white py-4 rounded-xl text-[16px] font-bold
+          transition-all transform active:scale-[0.98] shadow-lg disabled:opacity-50"
       >
-        {loading ? "Logging in..." : "Log In"}
+        {loading ? "Logging in..." : "LOG IN"}
       </button>
 
-      <p className="text-[12px] text-center text-gray-600">
+      <p className="text-[14px] font-medium text-center text-gray-600 mt-2">
         Don't have an account?
         <span
           onClick={() => navigate("/register")}
-          className="text-[#B59353] ml-1 cursor-pointer hover:underline"
+          className="text-[#B59353] font-bold ml-2 cursor-pointer hover:underline"
         >
           Register here
         </span>

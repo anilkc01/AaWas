@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
+import { Search, X, ArrowUpDown, Filter, Edit, Key, LogOut } from "lucide-react";
 import PropertyDetailCard from "../components/property/User/PropertyDetailCard";
 import UserPropertyCard from "../components/property/User/UserPropertyCard";
 import api from "../api/axios";
@@ -10,7 +10,7 @@ export default function BrowseProperties() {
   const [selectedPropertyId, setSelectedPropertyId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [sortBy, setSortBy] = useState("newest");
   
@@ -26,24 +26,16 @@ export default function BrowseProperties() {
     isBidding: false,
   });
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  useEffect(() => {
-    applyFiltersAndSearch();
-  }, [properties, searchQuery, filters, sortBy]);
+  useEffect(() => { fetchProperties(); }, []);
+  useEffect(() => { applyFiltersAndSearch(); }, [properties, searchQuery, filters, sortBy]);
 
   const fetchProperties = async () => {
     try {
       setLoading(true);
       const res = await api.get("/api/properties/browse");
       setProperties(res.data);
-    } catch (error) {
-      console.error("Error fetching properties:", error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error("Error fetching properties:", error); }
+    finally { setLoading(false); }
   };
 
   const applyFiltersAndSearch = () => {
@@ -52,339 +44,170 @@ export default function BrowseProperties() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((property) => {
-        const locationMatch = property.location
-          .split(",")[0]
-          .toLowerCase()
-          .includes(query);
-        const descriptionMatch = property.description
-          ?.toLowerCase()
-          .includes(query);
+        const locationMatch = property.location.toLowerCase().includes(query);
+        const descriptionMatch = property.description?.toLowerCase().includes(query);
         return locationMatch || descriptionMatch;
       });
     }
 
-    if (filters.propertyType !== "all") {
-      filtered = filtered.filter((p) => p.propertyType === filters.propertyType);
-    }
+    // ALL FILTER LOGIC RESTORED
+    if (filters.propertyType !== "all") filtered = filtered.filter((p) => p.propertyType === filters.propertyType);
+    if (filters.listedFor !== "all") filtered = filtered.filter((p) => p.listedFor === filters.listedFor);
+    if (filters.minPrice) filtered = filtered.filter((p) => p.price >= Number(filters.minPrice));
+    if (filters.maxPrice) filtered = filtered.filter((p) => p.price <= Number(filters.maxPrice));
+    if (filters.minBeds) filtered = filtered.filter((p) => p.beds >= Number(filters.minBeds));
+    if (filters.minKitchen) filtered = filtered.filter((p) => p.kitchen >= Number(filters.minKitchen));
+    if (filters.minLiving) filtered = filtered.filter((p) => p.living >= Number(filters.minLiving));
+    if (filters.minWashroom) filtered = filtered.filter((p) => p.washroom >= Number(filters.minWashroom));
+    if (filters.isBidding) filtered = filtered.filter((p) => p.isBidding === true);
 
-    if (filters.listedFor !== "all") {
-      filtered = filtered.filter((p) => p.listedFor === filters.listedFor);
-    }
-
-    if (filters.minPrice) {
-      filtered = filtered.filter((p) => p.price >= Number(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      filtered = filtered.filter((p) => p.price <= Number(filters.maxPrice));
-    }
-
-    if (filters.minBeds) {
-      filtered = filtered.filter((p) => p.beds >= Number(filters.minBeds));
-    }
-    if (filters.minKitchen) {
-      filtered = filtered.filter((p) => p.kitchen >= Number(filters.minKitchen));
-    }
-    if (filters.minLiving) {
-      filtered = filtered.filter((p) => p.living >= Number(filters.minLiving));
-    }
-    if (filters.minWashroom) {
-      filtered = filtered.filter((p) => p.washroom >= Number(filters.minWashroom));
-    }
-
-    if (filters.isBidding) {
-      filtered = filtered.filter((p) => p.isBidding === true);
-    }
-
-    // Apply sorting
-    if (sortBy === "price-low") {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price-high") {
-      filtered.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "newest") {
-      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
+    if (sortBy === "price-low") filtered.sort((a, b) => a.price - b.price);
+    else if (sortBy === "price-high") filtered.sort((a, b) => b.price - a.price);
+    else if (sortBy === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     setFilteredProperties(filtered);
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleFilterChange = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
 
   const clearFilters = () => {
     setFilters({
-      propertyType: "all",
-      listedFor: "all",
-      minPrice: "",
-      maxPrice: "",
-      minBeds: "",
-      minKitchen: "",
-      minLiving: "",
-      minWashroom: "",
-      isBidding: false,
+      propertyType: "all", listedFor: "all", minPrice: "", maxPrice: "",
+      minBeds: "", minKitchen: "", minLiving: "", minWashroom: "", isBidding: false,
     });
     setSearchQuery("");
   };
 
-  const handleSortChange = (value) => {
-    setSortBy(value);
-    setShowSortMenu(false);
-  };
+  // REUSABLE FILTER COMPONENT (ALL FIELDS INCLUDED)
+  const FilterContent = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="font-bold text-xl">Filters</h2>
+        <button onClick={clearFilters} className="text-sm font-bold text-[#B59353] hover:underline">Clear all</button>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">Property Type</label>
+          <select value={filters.propertyType} onChange={(e) => handleFilterChange("propertyType", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#B59353]">
+            <option value="all">All Types</option>
+            <option value="house">House</option>
+            <option value="apartment">Apartment</option>
+            <option value="room">Room</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">Listed For</label>
+          <select value={filters.listedFor} onChange={(e) => handleFilterChange("listedFor", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-[#B59353]">
+            <option value="all">All</option>
+            <option value="sell">For Sale</option>
+            <option value="rent">For Rent</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">Price Range (NPR)</label>
+          <div className="flex gap-2">
+            <input type="number" placeholder="Min" value={filters.minPrice} onChange={(e) => handleFilterChange("minPrice", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-[#B59353]" />
+            <input type="number" placeholder="Max" value={filters.maxPrice} onChange={(e) => handleFilterChange("maxPrice", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-[#B59353]" />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">Minimum Rooms</label>
+          <div className="grid grid-cols-2 gap-2">
+            <input type="number" placeholder="Beds" value={filters.minBeds} onChange={(e) => handleFilterChange("minBeds", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none" />
+            <input type="number" placeholder="Kitchen" value={filters.minKitchen} onChange={(e) => handleFilterChange("minKitchen", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none" />
+            <input type="number" placeholder="Living" value={filters.minLiving} onChange={(e) => handleFilterChange("minLiving", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none" />
+            <input type="number" placeholder="Washroom" value={filters.minWashroom} onChange={(e) => handleFilterChange("minWashroom", e.target.value)} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold outline-none" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="bidding" checked={filters.isBidding} onChange={(e) => handleFilterChange("isBidding", e.target.checked)} className="w-5 h-5 accent-[#B59353]" />
+          <label htmlFor="bidding" className="text-sm font-bold text-gray-700">Bidding only</label>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <div className="pt-5 w-full min-h-screen bg-gray-50">
-        <div className="p-4 w-full mx-auto">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-4">Browse Properties</h1>
+      <div className="pt-24 w-full min-h-screen bg-gray-50">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+          
+          <div className="flex justify-between items-end mb-6">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900">Browse Properties</h1>
           </div>
 
-          <div className="flex gap-6">
-            {showFilters && (
-              <aside className="w-64 bg-white rounded-lg shadow p-4 h-fit sticky top-20">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-semibold text-lg">Filters</h2>
-                  <button
-                    onClick={clearFilters}
-                    className="text-xs text-blue-600 hover:underline"
-                  >
-                    Clear all
-                  </button>
-                </div>
+          <div className="flex gap-8">
+            {/* Desktop Sidebar: Visible only on lg (Desktop) */}
+            <aside className="hidden lg:block w-72 shrink-0">
+              <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-28 border border-gray-100">
+                <FilterContent />
+              </div>
+            </aside>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Property Type
-                    </label>
-                    <select
-                      value={filters.propertyType}
-                      onChange={(e) =>
-                        handleFilterChange("propertyType", e.target.value)
-                      }
-                      className="w-full border rounded px-3 py-2 text-sm"
-                    >
-                      <option value="all">All Types</option>
-                      <option value="house">House</option>
-                      <option value="apartment">Apartment</option>
-                      <option value="room">Room</option>
-                    </select>
-                  </div>
+            {/* Mobile/Tablet Drawer */}
+            <div className={`fixed inset-0 z-[100] lg:hidden transition-opacity ${showFilters ? "opacity-100 visible" : "opacity-0 invisible"}`}>
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFilters(false)} />
+              <div className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-[2rem] p-8 transition-transform duration-300 transform ${showFilters ? "translate-y-0" : "translate-y-full"}`}>
+                <FilterContent />
+                <button onClick={() => setShowFilters(false)} className="w-full bg-[#B59353] text-white font-bold py-4 rounded-xl mt-6">Apply Filters</button>
+              </div>
+            </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Listed For
-                    </label>
-                    <select
-                      value={filters.listedFor}
-                      onChange={(e) =>
-                        handleFilterChange("listedFor", e.target.value)
-                      }
-                      className="w-full border rounded px-3 py-2 text-sm"
-                    >
-                      <option value="all">All</option>
-                      <option value="sell">For Sale</option>
-                      <option value="rent">For Rent</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Price Range (NPR)
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.minPrice}
-                        onChange={(e) =>
-                          handleFilterChange("minPrice", e.target.value)
-                        }
-                        className="w-full border rounded px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={filters.maxPrice}
-                        onChange={(e) =>
-                          handleFilterChange("maxPrice", e.target.value)
-                        }
-                        className="w-full border rounded px-3 py-2 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Minimum Rooms
-                    </label>
-                    <div className="space-y-2">
-                      <input
-                        type="number"
-                        placeholder="Beds"
-                        value={filters.minBeds}
-                        onChange={(e) =>
-                          handleFilterChange("minBeds", e.target.value)
-                        }
-                        className="w-full border rounded px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Kitchen"
-                        value={filters.minKitchen}
-                        onChange={(e) =>
-                          handleFilterChange("minKitchen", e.target.value)
-                        }
-                        className="w-full border rounded px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Living/Hall"
-                        value={filters.minLiving}
-                        onChange={(e) =>
-                          handleFilterChange("minLiving", e.target.value)
-                        }
-                        className="w-full border rounded px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Washroom"
-                        value={filters.minWashroom}
-                        onChange={(e) =>
-                          handleFilterChange("minWashroom", e.target.value)
-                        }
-                        className="w-full border rounded px-3 py-2 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="bidding"
-                      checked={filters.isBidding}
-                      onChange={(e) =>
-                        handleFilterChange("isBidding", e.target.checked)
-                      }
-                      className="w-4 h-4"
-                    />
-                    <label htmlFor="bidding" className="text-sm">
-                      Bidding only
-                    </label>
-                  </div>
-                </div>
-              </aside>
-            )}
-
-            <main className="flex-1">
-              <div className="mb-4 flex gap-3">
+            <main className="flex-1 min-w-0">
+              <div className="flex gap-2 mb-8">
                 <div className="relative flex-1">
-                  <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input
                     type="text"
-                    placeholder="Search by location or description..."
+                    placeholder="Search location..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl shadow-sm outline-none font-semibold text-sm focus:border-[#B59353]"
                   />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X size={18} />
-                    </button>
-                  )}
+                  {searchQuery && <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500"><X size={18} /></button>}
                 </div>
 
-                <div className="relative">
-                  <button
-                    onClick={() => setShowSortMenu(!showSortMenu)}
-                    className="flex items-center gap-2 px-4 py-3 bg-white border rounded-lg hover:bg-gray-50"
-                  >
-                    <ArrowUpDown size={18} />
-                    <span className="text-sm font-medium">Sort</span>
-                  </button>
+                {/* Filter toggle for everything below Desktop */}
+                <button onClick={() => setShowFilters(true)} className="lg:hidden flex items-center justify-center w-12 h-12 bg-white border border-gray-200 rounded-xl shadow-sm text-[#B59353]"><Filter size={20} /></button>
 
+                <div className="relative">
+                  <button onClick={() => setShowSortMenu(!showSortMenu)} className="flex items-center justify-center w-12 h-12 bg-white border border-gray-200 rounded-xl shadow-sm text-[#B59353]"><ArrowUpDown size={20} /></button>
                   {showSortMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
-                      <button
-                        onClick={() => handleSortChange("newest")}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
-                          sortBy === "newest" ? "bg-blue-50 text-blue-600" : ""
-                        }`}
-                      >
-                        Newest First
-                      </button>
-                      <button
-                        onClick={() => handleSortChange("price-low")}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
-                          sortBy === "price-low" ? "bg-blue-50 text-blue-600" : ""
-                        }`}
-                      >
-                        Price: Low to High
-                      </button>
-                      <button
-                        onClick={() => handleSortChange("price-high")}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
-                          sortBy === "price-high" ? "bg-blue-50 text-blue-600" : ""
-                        }`}
-                      >
-                        Price: High to Low
-                      </button>
+                    <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden py-2">
+                      {['newest', 'price-low', 'price-high'].map((m) => (
+                        <button key={m} onClick={() => { setSortBy(m); setShowSortMenu(false); }} className={`w-full text-left px-4 py-3 text-sm font-bold ${sortBy === m ? "text-[#B59353] bg-gray-50" : "text-gray-700"}`}>
+                          {m === 'newest' ? 'Newest First' : m === 'price-low' ? 'Price: Low-High' : 'Price: High-Low'}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
-
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="md:hidden flex items-center gap-2 px-4 py-3 bg-white border rounded-lg"
-                >
-                  <SlidersHorizontal size={18} />
-                </button>
               </div>
 
               {loading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Loading properties...</p>
-                </div>
+                <div className="py-20 text-center font-bold text-gray-400 animate-pulse">Loading properties...</div>
               ) : filteredProperties.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg">
-                  <p className="text-gray-600">
-                    No properties found matching your criteria.
-                  </p>
+                <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-100">
+                  <p className="text-gray-400 font-bold">No properties found matching your criteria.</p>
                 </div>
               ) : (
-                <>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {filteredProperties.length} properties found
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {filteredProperties.map((property) => (
-                      <UserPropertyCard
-                        key={property.id}
-                        property={property}
-                        onClick={() => setSelectedPropertyId(property.id)}
-                      />
-                    ))}
-                  </div>
-                </>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {filteredProperties.map((p) => (
+                    <UserPropertyCard key={p.id} property={p} onClick={() => setSelectedPropertyId(p.id)} />
+                  ))}
+                </div>
               )}
             </main>
           </div>
         </div>
       </div>
 
-      {selectedPropertyId && (
-        <PropertyDetailCard
-          propertyId={selectedPropertyId}
-          onClose={() => setSelectedPropertyId(null)}
-        />
-      )}
+      {selectedPropertyId && <PropertyDetailCard propertyId={selectedPropertyId} onClose={() => setSelectedPropertyId(null)} />}
     </>
   );
 }

@@ -5,62 +5,16 @@ import path from "path";
 import User from "../models/User.js";
 import Favourite from "../models/favourites.js";
 import PropertyReport from "../models/PropertyReports.js";
-import Kyc from "../models/kyc.js";
 import Appointment from "../models/appointments.js";
+import Kyc from "../models/Kyc.js";
 
-/**
- * Helper: Ensure property directory exists
- */
-const ensurePropertyDir = (propertyId) => {
-  const dir = `uploads/properties/${propertyId}`;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  return dir;
-};
+import {
+  ensurePropertyDir,
+  deleteFile,
+  deletePropertyFolder,
+  moveToPropertyFolder,
+} from "../Security/helpers.js";
 
-/**
- * Helper: Delete a file safely
- */
-const deleteFile = (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  } catch (error) {
-    console.error(`Failed to delete file: ${filePath}`, error);
-  }
-};
-
-/**
- * Helper: Delete entire property folder
- */
-const deletePropertyFolder = (propertyId) => {
-  const dir = `uploads/properties/${propertyId}`;
-  try {
-    if (fs.existsSync(dir)) {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  } catch (error) {
-    console.error(`Failed to delete folder: ${dir}`, error);
-  }
-};
-
-/**
- * Helper: Move file to property-specific folder
- */
-const moveToPropertyFolder = (sourcePath, propertyId, filename) => {
-  const propertyDir = ensurePropertyDir(propertyId);
-  const destPath = path.join(propertyDir, filename);
-
-  try {
-    fs.renameSync(sourcePath, destPath);
-    return `uploads/properties/${propertyId}/${filename}`;
-  } catch (error) {
-    console.error("Failed to move file:", error);
-    return sourcePath;
-  }
-};
 
 /**
  * CREATE Property

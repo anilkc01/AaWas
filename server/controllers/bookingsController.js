@@ -24,6 +24,7 @@ export const getPropertyBids = async (req, res) => {
     }
 
     // Get all active bids
+    
     const bids = await Bid.findAll({
       where: {
         propertyId,
