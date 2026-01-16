@@ -8,59 +8,79 @@ const Property = sequelize.define("Property", {
     primaryKey: true,
     autoIncrement: true,
   },
+
   propertyType: {
     type: DataTypes.ENUM("house", "apartment", "room"),
     allowNull: false,
   },
+
   listedFor: {
     type: DataTypes.ENUM("sell", "rent"),
     allowNull: false,
   },
+
   price: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+
   location: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   latitude: {
     type: DataTypes.FLOAT,
     allowNull: true,
   },
+
   longitude: {
     type: DataTypes.FLOAT,
     allowNull: true,
   },
+
   description: {
     type: DataTypes.TEXT,
   },
+
   beds: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+
   living: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+
   kitchen: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+
   washroom: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+
   dpImage: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   images: {
     type: DataTypes.ARRAY(DataTypes.STRING),
   },
+
   isBidding: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+
+  status: {
+    type: DataTypes.ENUM("available", "booked"),
+    allowNull: false,
+    defaultValue: "available",
   },
 });
 

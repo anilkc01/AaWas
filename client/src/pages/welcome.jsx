@@ -1,77 +1,86 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
-import { useState } from 'react';
+import { ArrowRight, ChevronDown, Search } from "lucide-react";
+import { useState } from "react";
 
 export default function Welcome() {
-  const [selectedType, setSelectedType] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+
   return (
     <div
       className="w-full h-screen bg-cover bg-center pt-20"
       style={{ backgroundImage: "url('/bg.png')" }}
     >
-      <div className="bg-black/10 w-full h-full flex items-center content-center">
-        <div className="max-w-2xl mx-auto px-6 relative">
+      <div className="bg-black/20 w-full h-full flex items-center">
+        <div className="max-w-5xl mx-auto px-6 w-full relative">
 
-          {/* Bigger heading */}
-          <h1 className="text-6xl font-extrabold text-yellow-500 drop-shadow-xl leading-tight animate-fade-in-up">
-            Find your space <br /> Live your story.
+          {/* Headline - Responsive sizing */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white drop-shadow-2xl leading-tight animate-fade-in-up">
+            Find your <span className="text-[#B59353]">space</span> <br /> 
+            Live your <span className="text-[#B59353]">story.</span>
           </h1>
 
-          <div className="flex flex-row w-fit  animate-slide-in-up relative ">
+          {/* Search Section */}
+          <div className="mt-8 md:mt-10 flex flex-col md:flex-row items-center gap-4 md:gap-5 animate-slide-in-up">
+            
+            {/* The Search Bar - More Rounded */}
+            <div className="bg-white rounded-[2rem] md:rounded-full shadow-2xl flex flex-col md:flex-row flex-1 items-stretch md:items-center md:divide-x divide-gray-100 w-full max-w-3xl overflow-hidden border border-white/20">
+              
+              {/* Search input */}
+              <div className="flex items-center gap-3 px-6 md:px-7 flex-1 border-b md:border-b-0 border-gray-100">
+                {/* FIXED: Removed md:size and used a standard size */}
+                <Search className="text-gray-400 shrink-0" size={22} />
+                <input
+                  type="text"
+                  placeholder="Search properties..."
+                  className="w-full py-4 text-base md:text-[18px] font-bold focus:outline-none placeholder:text-gray-400 placeholder:font-medium bg-transparent"
+                />
+              </div>
 
-          {/* Search box */}
-          <div className=" bg-white p-0.1 rounded-xl shadow flex items-center space-x-5 pe-2">
-
-            <input
-              type="text"
-              placeholder="Search"
-              className="flex-1 px-2 py-1.5 rounded-xl text-sm focus:outline-none"
-            />
-
-            <div className="relative">
+              {/* Type Select */}
+              <div className="relative flex items-center px-6 md:px-6 w-full md:w-48 border-b md:border-b-0 border-gray-100">
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className={`pl-2 py-1.5 text-sm border-gray-200 rounded-md focus:outline-none appearance-none bg-transparent focus:text-black ${
-                    selectedType === '' ? 'text-gray-400' : 'text-black'
-                  } pr-8`} 
+                  className={`w-full py-4 text-base md:text-[18px] font-bold focus:outline-none appearance-none bg-transparent pr-6 cursor-pointer ${
+                    selectedType === "" ? "text-gray-400" : "text-black"
+                  }`}
                 >
                   <option value="" disabled hidden>Type</option>
-                  <option value="apartment" className="text-black">Apartment</option>
-                  <option value="house" className="text-black">House</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="house">House</option>
                 </select>
-                <ChevronDown className="absolute right-0 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none mr-2 text-gray-400" />
+                <ChevronDown className="absolute right-6 h-5 w-5 pointer-events-none text-gray-400" />
               </div>
 
-            <div className="relative">
+              {/* Location Select */}
+              <div className="relative flex items-center px-6 md:px-6 w-full md:w-48">
                 <select
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
-                  
-                  className={`pl-2 py-1.5 text-sm border-gray-200 rounded-xl focus:outline-none appearance-none bg-transparent focus:text-black ${
-                    selectedLocation === '' ? 'text-gray-400' : 'text-black'
-                  } pr-8`}
+                  className={`w-full py-4 text-base md:text-[18px] font-bold focus:outline-none appearance-none bg-transparent pr-6 cursor-pointer ${
+                    selectedLocation === "" ? "text-gray-400" : "text-black"
+                  }`}
                 >
                   <option value="" disabled hidden>Location</option>
-                  <option value="kathmandu" className="text-black">Kathmandu</option>
-                  <option value="pokhara" className="text-black">Pokhara</option>
+                  <option value="kathmandu">Kathmandu</option>
+                  <option value="pokhara">Pokhara</option>
                 </select>
-                <ChevronDown className="absolute right-0 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none mr-2 text-gray-400" />
+                <ChevronDown className="absolute right-6 h-5 w-5 pointer-events-none text-gray-400" />
               </div>
+            </div>
 
-          </div>
-          <div className="w-1 "></div>
-          
-         <button className="ml-2 p-2 bg-yellow-500 text-black rounded-full shadow-lg hover:bg-yellow-600 focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:ring-opacity-75 transition duration-300 transform hover:scale-105">
-              <ArrowRight className="h-4 w-4" />
+            {/* Separate Action Button - Perfect Circle */}
+            <button className="bg-[#B59353] text-white w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl hover:bg-[#a68546] flex items-center justify-center transition-all hover:scale-110 active:scale-95 group shrink-0">
+              <ArrowRight className="h-7 w-7 md:h-8 md:w-8 stroke-[3px]" />
             </button>
 
           </div>
 
-          
-          
+          <p className="text-white/90 mt-6 md:mt-8 text-lg md:text-xl font-bold drop-shadow-md ml-2">
+            Explore <span className="underline decoration-[#B59353] decoration-2 underline-offset-8 cursor-pointer">500+ Luxury Properties</span>
+          </p>
+
         </div>
-        
       </div>
     </div>
   );

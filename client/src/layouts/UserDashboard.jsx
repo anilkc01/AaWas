@@ -1,21 +1,25 @@
-import { useState } from "react";
-import Navbar from "../components/navBars/NavBar2.jsx";
-import BrowseProperties from "../pages/browseProperties.jsx";
-import MyProperties from "../pages/myProperties.jsx";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import Navbar from "../components/navBars/UserNavBar.jsx";
 
-export default function DashboardPage({ onLogout }) {
-  const [view, setView] = useState("browse"); // "browse" | "my"
+export default function UserDashboard({ onLogout }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.message) {
+      toast.success(location.state.message, { id: "login" });
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   return (
     <>
-      <Navbar
-        onLogout={onLogout}
-        view={view}
-        setView={setView}
-      />
+      <Navbar onLogout={onLogout} />
 
       <div className="pt-14 px-6">
-        {view === "my" ? <MyProperties /> : <BrowseProperties />}
+        <Outlet />
       </div>
     </>
   );
