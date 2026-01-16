@@ -332,6 +332,46 @@ export default function SeekerAppointmentBooking() {
       price: 1800,
       availableSlots: ["10:30 AM", "1:30 PM", "4:30 PM"]
     }
+        {
+      id: 1,
+      propertyTitle: "Modern Downtown Apartment",
+      address: "123 Main St, New York, NY",
+      propertyType: "Apartment",
+      agentName: "John Smith",
+      agentPhone: "(555) 123-4567",
+      price: 1500,
+      availableSlots: ["9:00 AM", "11:00 AM", "2:00 PM", "4:00 PM"]
+    },
+    {
+      id: 2,
+      propertyTitle: "Luxury Villa with Pool",
+      address: "456 Luxury Ln, Los Angeles, CA",
+      propertyType: "Villa",
+      agentName: "Sarah Johnson",
+      agentPhone: "(555) 987-6543",
+      price: 3500,
+      availableSlots: ["10:00 AM", "1:00 PM", "3:00 PM"]
+    },
+    {
+      id: 3,
+      propertyTitle: "Cozy Suburban House",
+      address: "789 Oak Ave, Chicago, IL",
+      propertyType: "House",
+      agentName: "Mike Davis",
+      agentPhone: "(555) 456-7890",
+      price: 2200,
+      availableSlots: ["9:30 AM", "12:00 PM", "2:30 PM", "5:00 PM"]
+    },
+    {
+      id: 4,
+      propertyTitle: "Stylish Loft in Arts District",
+      address: "321 Creative St, Portland, OR",
+      propertyType: "Condo",
+      agentName: "Emily Chen",
+      agentPhone: "(555) 246-8135",
+      price: 1800,
+      availableSlots: ["10:30 AM", "1:30 PM", "4:30 PM"]
+    }
   ]);
 
   const handleFilterChange = (key, value) => {
@@ -430,6 +470,24 @@ export default function SeekerAppointmentBooking() {
 
         {/* Info Section */}
         <div className="bg-blue-50 rounded-lg p-6 mt-12">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Why Book With Us?</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">Professional Agents</h4>
+              <p className="text-gray-600 text-sm">Meet with experienced real estate professionals who know the market.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">Flexible Scheduling</h4>
+              <p className="text-gray-600 text-sm">Choose from multiple time slots that fit your busy schedule.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">Virtual Options</h4>
+              <p className="text-gray-600 text-sm">Can't visit in person? Book a virtual tour from anywhere.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+              <div className="bg-blue-50 rounded-lg p-6 mt-12">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Why Book With Us?</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
