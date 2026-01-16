@@ -11,7 +11,11 @@ import {
   Sofa,
   Heart,
   Flag,
+  Calendar,
+  Gavel,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = process.env.REACT_APP_API_BASE;
 
@@ -24,6 +28,18 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
   const [reportReason, setReportReason] = useState("");
   const [reportMessage, setReportMessage] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
+
+  const [showBiddingModal, setShowBiddingModal] = useState(false);
+  const [bids, setBids] = useState([]);
+  const [bidsLoading, setBidsLoading] = useState(false);
+  const [bidAmount, setBidAmount] = useState("");
+  const [bidLoading, setBidLoading] = useState(false);
+
+  const [bidError, setBidError] = useState("");
+
+  const [appointmentLoading, setAppointmentLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!propertyId) return;
@@ -42,6 +58,130 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
 
     fetchProperty();
   }, [propertyId]);
+
+  const fetchBids = async () => {
+    try {
+      setBidsLoading(true);
+      const res = await api.get(`/api/bookings/bids/${propertyId}`);
+      setBids(res.data);
+    } catch (error) {
+      console.error("Failed to load bids", error);
+      toast.error("Failed to Fetch Bids");
+    } finally {
+      setBidsLoading(false);
+    }
+  };
+
+  const ensureKycVerified = async () => {
+  try {
+    const res = await api.get("/api/kyc/status");
+
+    if (res.data.status !== "verified") {
+
+      toast.info("Please complete KYC to place bids");
+      navigate("/kyc");
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    navigate("/kyc");
+    return false;
+  }
+};
+
+const handleOpenBidding = async () => {
+  const allowed = await ensureKycVerified();
+  if (!allowed) return;
+
+  setShowBiddingModal(true);
+  await fetchBids(); 
+};
+
+
+
+  const handlePlaceBid = async () => {
+    const bidValue = parseFloat(bidAmount);
+    setBidError("");
+
+    // Basic validation
+    if (!bidAmount || isNaN(bidValue) || bidValue <= 0) {
+      setBidError("Please enter a valid bid amount");
+      return;
+    }
+
+    const minBid = property.price;
+    const highestBid = bids.length > 0 ? parseFloat(bids[0].bidAmount) : 0;
+
+    if (bids.length === 0 && bidValue < minBid) {
+      setBidError(`Minimum bid is ₨ ${Number(minBid).toLocaleString()}`);
+      return;
+    }
+
+    if (bids.length > 0 && bidValue <= highestBid) {
+      setBidError(
+        `Bid must be higher than ₨ ${Number(highestBid).toLocaleString()}`
+      );
+      return;
+    }
+
+    try {
+      setBidLoading(true);
+
+      await api.post(`/api/bookings/bid/${propertyId}`, {
+        bidAmount: bidValue,
+      });
+
+      toast.success("Bid placed successfully");
+      setBidAmount("");
+      setBidError("");
+      await fetchBids();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to place bid");
+    } finally {
+      setBidLoading(false);
+    }
+  };
+
+const handleAppointmentSubmit = async ({ action }) => {
+  try {
+    setAppointmentLoading(true);
+
+    let response;
+
+    if (action === "book") {
+      response = await api.post(
+        `/api/bookings/appointment/${propertyId}`
+      );
+    }
+
+    if (action === "cancel") {
+      response = await api.delete(
+        `/api/bookings/appointment/${propertyId}`
+      );
+    }
+
+   
+    toast.success(response.data.message);
+
+    
+    setProperty((prev) => ({
+      ...prev,
+      hasAppointment: action === "book" ? true : false,
+    }));
+  } catch (error) {
+    console.error("Appointment action failed:", error);
+
+    toast.error(
+      error.response?.data?.message ||
+        "Something went wrong. Please try again."
+    );
+  } finally {
+    setAppointmentLoading(false);
+  }
+};
+
 
   if (loading || !property) {
     return (
@@ -83,7 +223,6 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
   const handleReportSubmit = async () => {
     try {
       setReportLoading(true);
-      console.log(property.id);
       await api.post(`/api/properties/report/${property.id}`, {
         reason: reportReason,
         message: reportMessage,
@@ -263,12 +402,46 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
             </div>
           )}
 
-          {/* CTA */}
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold shadow-md transition">
-            Contact Owner
-          </button>
+          {/* CTA Buttons */}
+          <div className="space-y-3">
+            {property.isBidding ? (
+              <button
+                onClick={handleOpenBidding}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold shadow-md transition flex items-center justify-center gap-2"
+              >
+                <Gavel size={18} />
+                See Current Biddings
+              </button>
+            ) : property.hasAppointment ? (
+              <div className="space-y-2">
+                <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                  Owner has been notified and will contact you soon.
+                </div>
+
+                <button
+                  onClick={() => handleAppointmentSubmit({ action: "cancel" })}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold shadow-md transition"
+                >
+                  Cancel Appointment
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleAppointmentSubmit({ action: "book" })}
+                disabled={appointmentLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Calendar size={18} />
+                {appointmentLoading
+                  ? "Booking..."
+                  : "Book Appointment for Inspection"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Report Modal */}
       {showReportModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-xl p-6 space-y-4">
@@ -276,7 +449,6 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
               Report this property
             </h2>
 
-            {/* Reason */}
             <div>
               <label className="text-sm font-medium text-gray-700">
                 Reason <span className="text-red-500">*</span>
@@ -297,7 +469,6 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
               </select>
             </div>
 
-            {/* Description */}
             <div>
               <label className="text-sm font-medium text-gray-700">
                 Description (optional)
@@ -311,7 +482,6 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
               />
             </div>
 
-            {/* Actions */}
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setShowReportModal(false)}
@@ -327,6 +497,111 @@ export default function PropertyDetailCard({ propertyId, onClose }) {
               >
                 {reportLoading ? "Submitting..." : "Submit Report"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bidding Modal */}
+      {showBiddingModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-xl p-6 space-y-4 max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Current Biddings
+              </h2>
+              <button
+                onClick={() => setShowBiddingModal(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Bids List */}
+            <div className="flex-1 overflow-y-auto space-y-2 max-h-60 border rounded-lg p-3 bg-gray-50">
+              {bidsLoading ? (
+                <div className="text-center text-sm text-gray-500 py-4">
+                  Loading bids...
+                </div>
+              ) : bids.length === 0 ? (
+                <div className="text-center text-sm text-gray-500 py-4">
+                  No bids yet. Be the first to bid!
+                </div>
+              ) : (
+                bids.map((bid) => (
+                  <div
+                    key={bid.id}
+                    className="flex justify-between items-center bg-white p-3 rounded-lg border"
+                  >
+                    <div>
+                      <div className="font-semibold text-sm text-gray-900">
+                        {bid.User.fullName}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(bid.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-green-600">
+                        NPR {Number(bid.bidAmount).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Place Bid Section */}
+            <div className="space-y-3 pt-3 border-t">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Place Your Bid
+              </h3>
+
+              {/* Bid requirement info */}
+              <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                {bids.length === 0 ? (
+                  <span>
+                    Minimum bid: NPR{" "}
+                    <strong>{Number(property.price).toLocaleString()}</strong>
+                  </span>
+                ) : (
+                  <span>
+                    Bid must be higher than: NPR{" "}
+                    <strong>
+                      {Number(bids[0].bidAmount).toLocaleString()}
+                    </strong>
+                  </span>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={bidAmount}
+                  onChange={(e) => {
+                    setBidAmount(e.target.value);
+                    setBidError("");
+                  }}
+                  placeholder="Enter bid amount"
+                  className={`flex-1 border rounded-lg px-3 py-2 text-sm ${
+                    bidError ? "border-red-500" : ""
+                  }`}
+                />
+
+                <button
+                  onClick={handlePlaceBid}
+                  disabled={bidLoading || !bidAmount}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {bidLoading ? "Placing..." : "Place Bid"}
+                </button>
+              </div>
+
+              {bidError && (
+                <p className="text-xs text-red-600 mt-1">{bidError}</p>
+              )}
             </div>
           </div>
         </div>

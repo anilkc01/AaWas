@@ -146,6 +146,7 @@ const handleChange = (e) => {
           <input
             type="text"
             name="fullName"
+            maxLength={30}
             placeholder="Full Name"
             value={formData.fullName}
             onChange={handleChange}
@@ -165,6 +166,7 @@ const handleChange = (e) => {
           <input
             type="email"
             name="email"
+            maxLength={30}
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}

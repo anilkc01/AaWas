@@ -78,6 +78,7 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         error: "EMAIL_NOT_FOUND",
+        message: "User doesnot exist"
       });
     }
 
@@ -93,6 +94,7 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         error: "INVALID_PASSWORD",
+        message: "Invalid Password"
       });
     }
 

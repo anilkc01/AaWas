@@ -3,10 +3,10 @@ import { Op } from "sequelize";
 import fs from "fs";
 import path from "path";
 import User from "../models/User.js";
-import Kyc from "../models/Kyc.js";
-import PropertyReports from "../models/PropertyReports.js";
 import Favourite from "../models/favourites.js";
 import PropertyReport from "../models/PropertyReports.js";
+import Kyc from "../models/kyc.js";
+import Appointment from "../models/appointments.js";
 
 /**
  * Helper: Ensure property directory exists
@@ -276,14 +276,15 @@ export const getMyProperties = async (req, res) => {
   }
 };
 
+/*
 /**
- * GET Single Property
+ * GET Single Property  by id
  */
 export const getPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user?.id; // optional (for public access)
-
+    
     const property = await Property.findByPk(id, {
       include: [
         {
@@ -304,21 +305,35 @@ export const getPropertyById = async (req, res) => {
     }
 
     let isFavourite = false;
+    let hasAppointment = false;
 
     if (userId) {
+      // Check favourite
       const fav = await Favourite.findOne({
         where: {
           userId,
           propertyId: id,
         },
       });
-
       isFavourite = !!fav;
+
+      // Check appointment (only for non-bidding properties)
+      if (!property.isBidding) {
+        const appointment = await Appointment.findOne({
+          where: {
+            userId,
+            propertyId: id,
+            status: ["pending", "confirmed"],
+          },
+        });
+        hasAppointment = !!appointment;
+      }
     }
 
     res.json({
       ...property.toJSON(),
       isFavourite,
+      hasAppointment,
     });
   } catch (error) {
     console.error("Get property error:", error);
