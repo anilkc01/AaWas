@@ -1,0 +1,99 @@
+7a51628 | anilkc01 | 2026-01-16 21:57:43 +0545 | 2026-01-16 21:57:43 +0545 | all merged and testing
+0f58c8e | anilkc01 | 2026-01-16 21:49:25 +0545 | 2026-01-16 21:49:25 +0545 | Merge branch 'tekraj' into production
+7048321 | anilkc01 | 2026-01-16 21:49:13 +0545 | 2026-01-16 21:49:13 +0545 | Merge branch 'Rhytham' into production
+281785d | tekraj445 | 2026-01-16 21:43:40 +0545 | 2026-01-16 21:43:40 +0545 | seeker appointment booking
+ee74a3a | tekraj445 | 2026-01-16 21:41:29 +0545 | 2026-01-16 21:41:29 +0545 | owner appointment management
+2279015 | anilkc01 | 2026-01-16 21:39:24 +0545 | 2026-01-16 21:39:24 +0545 | admin nav
+071d484 | tekraj445 | 2026-01-16 21:34:19 +0545 | 2026-01-16 21:34:19 +0545 | updated code for appointment management
+d7315bb | rhytham63 | 2026-01-16 21:19:44 +0545 | 2026-01-16 21:19:44 +0545 | rate and rewie seekers done0
+84f0ddb | bikesh-khatri | 2026-01-16 21:13:47 +0545 | 2026-01-16 21:13:47 +0545 | seeker rating view
+919e344 | tekraj445 | 2026-01-16 19:07:50 +0545 | 2026-01-16 19:07:50 +0545 | code of the owner appointment management
+4b59d15 | anilkc01 | 2026-01-16 18:27:23 +0545 | 2026-01-16 18:27:23 +0545 | change passwoord and delete
+04177dd | bikesh-khatri | 2026-01-14 22:58:49 +0545 | 2026-01-14 22:58:49 +0545 | seeker rating
+e000dd9 | bikesh-khatri | 2026-01-14 00:17:26 +0545 | 2026-01-14 00:17:26 +0545 | view seeker rating
+4eb06c5 | bikesh-khatri | 2026-01-13 20:32:26 +0545 | 2026-01-13 20:32:26 +0545 | bid results completed
+aa34455 | tekraj445 | 2026-01-12 21:55:46 +0545 | 2026-01-12 21:55:46 +0545 | added code for appointment booking
+eac70b9 | tekraj445 | 2026-01-12 21:04:52 +0545 | 2026-01-12 21:04:52 +0545 | code of seeker appointment booking
+609622d | anilkc01 | 2026-01-12 20:58:05 +0545 | 2026-01-12 20:58:05 +0545 | bid kyc and appointment
+5157044 | rhytham63 | 2026-01-12 19:22:32 +0545 | 2026-01-12 19:22:32 +0545 | changes
+0ccb3c9 | rhytham63 | 2026-01-12 19:21:43 +0545 | 2026-01-12 19:21:43 +0545 | rate and review
+bbfe0cc | anilkc01 | 2026-01-11 22:45:10 +0545 | 2026-01-11 22:45:10 +0545 | zod validation
+265288a | anilkc01 | 2026-01-11 08:45:47 +0545 | 2026-01-11 08:45:47 +0545 | updtated
+9f6224c | bikesh-khatri | 2026-01-10 11:54:58 +0545 | 2026-01-10 11:54:58 +0545 | View bidding results
+377be02 | anilkc01 | 2026-01-09 22:32:33 +0545 | 2026-01-09 22:32:33 +0545 | scaling
+f452f03 | bikesh-khatri | 2026-01-09 21:47:07 +0545 | 2026-01-09 21:47:07 +0545 | bid results
+d9612af | tekraj445 | 2026-01-09 21:06:44 +0545 | 2026-01-09 21:06:44 +0545 | revised code
+66a2ba5 | rhytham63 | 2026-01-09 21:05:33 +0545 | 2026-01-09 21:05:33 +0545 | changes
+42defb0 | tekraj445 | 2026-01-09 21:05:20 +0545 | 2026-01-09 21:05:20 +0545 | code of view owner details
+b9eb794 | bikesh-khatri | 2026-01-09 18:50:54 +0545 | 2026-01-09 18:50:54 +0545 | view bidding property
+3c82fd0 | anilkc01 | 2026-01-08 22:11:07 +0545 | 2026-01-08 22:11:07 +0545 | report and add favourite
+35e0036 | rhytham63 | 2026-01-08 21:26:43 +0545 | 2026-01-08 21:26:43 +0545 | Changes
+a46e005 | bikesh-khatri | 2026-01-08 21:08:32 +0545 | 2026-01-08 21:08:32 +0545 | view bidding enabled property
+bcd2fb0 | anilkc01 | 2026-01-08 17:38:14 +0545 | 2026-01-08 17:38:14 +0545 | report
+06c779b | tekraj445 | 2026-01-05 18:39:13 +0545 | 2026-01-05 18:39:13 +0545 | revised code
+88fa1d7 | tekraj445 | 2026-01-05 18:37:02 +0545 | 2026-01-05 18:37:02 +0545 | starting code of search property
+4f9bff7 | anilkc01 | 2026-01-02 21:36:34 +0545 | 2026-01-02 21:36:34 +0545 | Merge branch 'production'
+e25d90c | anilkc01 | 2026-01-02 21:35:00 +0545 | 2026-01-02 21:35:00 +0545 | Merge branch 'Bikesh' into production
+c70dfc4 | anilkc01 | 2026-01-02 21:34:47 +0545 | 2026-01-02 21:34:47 +0545 | Merge branch 'Rhytham' into production
+5fab795 | anilkc01 | 2026-01-02 21:26:15 +0545 | 2026-01-02 21:26:15 +0545 | Merge branch 'production'
+e638e1a | bikesh-khatri | 2026-01-02 21:25:57 +0545 | 2026-01-02 21:25:57 +0545 | filter completed
+8a3266c | rhytham63 | 2026-01-02 21:25:57 +0545 | 2026-01-02 21:25:57 +0545 | Backend done for fraudeulent listings
+a92a36f | anilkc01 | 2026-01-02 21:23:42 +0545 | 2026-01-02 21:23:42 +0545 | Merge branch 'Rhytham' into production
+d22e15a | anilkc01 | 2026-01-02 21:23:29 +0545 | 2026-01-02 21:23:29 +0545 | Merge branch 'Bikesh' into production
+9a0a819 | anilkc01 | 2026-01-02 21:23:15 +0545 | 2026-01-02 21:23:15 +0545 | Merge branch 'tekraj' into production
+2a38aa3 | anilkc01 | 2026-01-02 21:22:49 +0545 | 2026-01-02 21:22:49 +0545 | Merge branch 'tekkc' into production
+c249759 | rhytham63 | 2026-01-02 21:21:51 +0545 | 2026-01-02 21:21:51 +0545 | Changes in front end in remove fraudelent listings
+aed1317 | anilkc01 | 2026-01-02 21:15:02 +0545 | 2026-01-02 21:15:02 +0545 | aapi call fix
+716e564 | anilkc01 | 2026-01-02 21:13:58 +0545 | 2026-01-02 21:13:58 +0545 | bid fix
+a193799 | tekraj445 | 2026-01-02 20:29:28 +0545 | 2026-01-02 20:29:28 +0545 | cancel bid
+4f8d0d2 | tekraj445 | 2026-01-02 20:27:40 +0545 | 2026-01-02 20:27:40 +0545 | revised code of bid
+efee024 | tekraj445 | 2026-01-02 20:26:01 +0545 | 2026-01-02 20:26:01 +0545 | final code for cancel bedding
+f73df23 | rhytham63 | 2025-12-31 21:02:06 +0545 | 2025-12-31 21:02:06 +0545 | Changes
+a92d2b2 | rhytham63 | 2025-12-31 20:59:48 +0545 | 2025-12-31 20:59:48 +0545 | Mark Property as sold done
+f9c4f94 | Tek KC | 2025-12-31 20:52:34 +0545 | 2025-12-31 20:52:34 +0545 | deleteted mistakenly uploaded docs
+ed17bd3 | Bikesh Khatri | 2025-12-31 20:50:13 +0545 | 2025-12-31 20:50:13 +0545 | Delete server/uploads directory
+4415794 | bikesh-khatri | 2025-12-31 20:42:31 +0545 | 2025-12-31 20:42:31 +0545 | filter properties
+3d48773 | bikesh-khatri | 2025-12-31 00:35:30 +0545 | 2025-12-31 00:35:30 +0545 | filter
+accc100 | tekraj445 | 2025-12-30 10:15:14 +0545 | 2025-12-30 10:15:14 +0545 | about us changed
+20f1585 | tekraj445 | 2025-12-30 10:07:25 +0545 | 2025-12-30 10:07:25 +0545 | check again
+7b5ac10 | Tek Raj Sapkota | 2025-12-30 09:59:48 +0545 | 2025-12-30 09:59:48 +0545 | config change
+6dcc7b1 | anilkc01 | 2025-12-29 22:51:30 +0545 | 2025-12-29 22:51:30 +0545 | Merge Rhytham
+76125d8 | anilkc01 | 2025-12-29 22:51:10 +0545 | 2025-12-29 22:51:10 +0545 | Merge Bikesh'
+a372926 | rhytham63 | 2025-12-29 21:34:35 +0545 | 2025-12-29 21:34:35 +0545 | ViewUsers'
+cc76414 | rhytham63 | 2025-12-29 21:21:01 +0545 | 2025-12-29 21:21:01 +0545 | Changes  in admin Dashboard
+0a92666 | anilkc01 | 2025-12-29 20:32:13 +0545 | 2025-12-29 20:32:13 +0545 | Merge remote-tracking branch 'origin/tekkc' into production
+b3d1484 | anilkc01 | 2025-12-29 20:30:00 +0545 | 2025-12-29 20:30:00 +0545 | Merge tekraj
+0f533e6 | anilkc01 | 2025-12-29 20:29:42 +0545 | 2025-12-29 20:29:42 +0545 | Merge Rhytham
+db41c9b | anilkc01 | 2025-12-29 20:29:20 +0545 | 2025-12-29 20:29:20 +0545 | Merge Bikesh
+e30f9b9 | anilkc01 | 2025-12-29 20:27:47 +0545 | 2025-12-29 20:27:47 +0545 | changes
+2990d6e | anilkc01 | 2025-12-29 00:22:20 +0545 | 2025-12-29 00:22:20 +0545 | edit and delete
+d675bc4 | anilkc01 | 2025-12-29 00:16:36 +0545 | 2025-12-29 00:16:36 +0545 | delete update
+af003f6 | tekraj445 | 2025-12-28 21:17:43 +0545 | 2025-12-28 21:17:43 +0545 | Add files via upload
+4bb7d25 | anilkc01 | 2025-12-28 21:14:47 +0545 | 2025-12-28 21:14:47 +0545 | enaableBid
+337aeba | bikesh-khatri | 2025-12-28 21:13:58 +0545 | 2025-12-28 21:13:58 +0545 |  delete with password verification
+5dbdcd6 | Bikesh Khatri | 2025-12-28 21:13:58 +0545 | 2025-12-28 21:13:58 +0545 |  delete with password verification
+debc810 | anilkc01 | 2025-12-28 19:33:21 +0545 | 2025-12-28 19:33:21 +0545 | prpertyDiaaog
+a91f7b1 | rhytham63 | 2025-12-28 18:43:16 +0545 | 2025-12-28 18:43:16 +0545 | Changes in Admin Dashboard
+03a14a1 | anilkc01 | 2025-12-28 00:59:08 +0545 | 2025-12-28 00:59:08 +0545 | addProperty
+09d8346 | anilkc01 | 2025-12-28 00:56:46 +0545 | 2025-12-28 00:56:46 +0545 | addProoperty
+bb6807c | anilkc01 | 2025-12-27 16:44:11 +0545 | 2025-12-27 16:44:11 +0545 | kycfbd
+a36e371 | tekraj445 | 2025-12-26 21:24:00 +0545 | 2025-12-26 21:24:00 +0545 | Add files via upload
+2b5e5e2 | anilkc01 | 2025-12-26 20:28:56 +0545 | 2025-12-26 20:28:56 +0545 | migrated as per module
+e2c1114 | bikesh-khatri | 2025-12-25 22:06:41 +0545 | 2025-12-25 22:06:41 +0545 | Delete account
+5f47734 | Bikesh Khatri | 2025-12-25 22:06:41 +0545 | 2025-12-25 22:06:41 +0545 | Delete account
+c031b54 | anilkc01 | 2025-12-25 22:05:34 +0545 | 2025-12-25 22:05:34 +0545 | dashboard
+d4c06e2 | rhytham63 | 2025-12-25 22:02:24 +0545 | 2025-12-25 22:02:24 +0545 | KYC verification done
+ded1455 | bikesh-khatri | 2025-12-24 20:59:29 +0545 | 2025-12-24 20:59:29 +0545 | kyc form
+c60df1a | Bikesh Khatri | 2025-12-24 20:59:29 +0545 | 2025-12-24 20:59:29 +0545 | kyc form
+d18803c | anilkc01 | 2025-12-13 13:46:16 +0545 | 2025-12-13 13:46:16 +0545 | merged and works
+0ab2d72 | bikesh-khatri | 2025-12-13 13:46:16 +0545 | 2025-12-13 13:46:16 +0545 | merged and works
+b667869 | anilkc01 | 2025-12-13 13:43:10 +0545 | 2025-12-13 13:43:10 +0545 | Merge remote-tracking branch 'remotes/origin/tekraj' into production
+9fe4c90 | bikesh-khatri | 2025-12-13 13:43:10 +0545 | 2025-12-13 13:43:10 +0545 | Merge remote-tracking branch 'remotes/origin/tekraj' into production
+8a8d7a8 | rhytham63 | 2025-12-10 21:21:05 +0545 | 2025-12-10 21:21:05 +0545 | login frontend added
+7deeb13 | bikesh-khatri | 2025-12-10 21:21:05 +0545 | 2025-12-10 21:21:05 +0545 | login frontend added
+69ebf3d | Tek Raj Sapkota | 2025-12-10 20:48:23 +0545 | 2025-12-10 20:48:23 +0545 | registration frontend
+f157598 | bikesh-khatri | 2025-12-10 20:48:23 +0545 | 2025-12-10 20:48:23 +0545 | registration frontend
+c6f0d99 | anilkc01 | 2025-12-10 19:04:12 +0545 | 2025-12-10 19:04:12 +0545 | welcome screen for guest done
+2a7a4e0 | bikesh-khatri | 2025-12-10 19:04:12 +0545 | 2025-12-10 19:04:12 +0545 | welcome screen for guest done
+9d84e31 | anilkc01 | 2025-12-03 18:24:05 +0545 | 2025-12-03 18:24:05 +0545 | Project Initial Stucture Setup
+9d87293 | bikesh-khatri | 2025-12-03 18:24:05 +0545 | 2025-12-03 18:24:05 +0545 | Project Initial Stucture Setup
