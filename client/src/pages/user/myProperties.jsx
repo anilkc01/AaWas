@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import api from "../../api/axios";
 
-import PropertyCard from "../components/property/Owner/MyPropertyCard";
-import AddPropertyCard from "../components/property/Owner/AddPropertyCard";
-import { AddPropertyDialog } from "../components/property/Owner/AddPropertyDialog";
+import PropertyCard from "../../components/property/Owner/MyPropertyCard";
+import AddPropertyCard from "../../components/property/Owner/AddPropertyCard";
+import { AddPropertyDialog } from "../../components/property/Owner/AddPropertyDialog";
 
 export default function MyProperties() {
   const navigate = useNavigate();

@@ -6,9 +6,13 @@ import GuestPage from "./layouts/guestWelcome";
 import UserDashboard from "./layouts/UserDashboard";
 import AdminDashboard from "./layouts/AdminDashboard";
 
-import BrowseProperties from "./pages/browseProperties";
-import MyProperties from "./pages/myProperties";
-import KycForm from "./pages/kyc";
+import BrowseProperties from "./pages/user/browseProperties";
+import MyProperties from "./pages/user/myProperties";
+import KycForm from "./pages/user/kyc";
+import UsersPage from "./pages/admin/usersPage";
+import PropertiesPage from "./pages/admin/propertiesPage";
+import ReportsPage from "./pages/admin/reportsPage";
+import KycPage from "./pages/admin/kycPage";
 
 export default function AppContent() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -17,8 +21,7 @@ export default function AppContent() {
 
   const checkAuth = async () => {
     const token =
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("token");
+      localStorage.getItem("token") || sessionStorage.getItem("token");
 
     if (!token) {
       setAuthorized(false);
@@ -49,18 +52,19 @@ export default function AppContent() {
     <Routes>
       {/* GUEST */}
       {!authorized && (
-        <Route
-          path="*"
-          element={<GuestPage onLoginSuccess={checkAuth} />}
-        />
+        <Route path="*" element={<GuestPage onLoginSuccess={checkAuth} />} />
       )}
 
       {/* ADMIN */}
       {authorized && role === "admin" && (
-        <Route
-          path="/*"
-          element={<AdminDashboard onLogout={checkAuth} />}
-        />
+        <Route path="/" element={<AdminDashboard onLogout={checkAuth} />}>
+          {/* Default admin page */}
+          <Route index element={<Navigate to="/users" replace />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="properties" element={<PropertiesPage />} />
+          <Route path="kyc" element={<KycPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+        </Route>
       )}
 
       {/* USER */}

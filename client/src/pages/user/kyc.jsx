@@ -1,7 +1,7 @@
 // pages/KycPage.jsx
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import KycForm from "../components/Kyc/kycForm";
+import api from "../../api/axios";
+import KycForm from "../../components/Kyc/kycForm";
 
 
 export default function KycPage() {

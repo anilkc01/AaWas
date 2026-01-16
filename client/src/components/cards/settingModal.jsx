@@ -8,7 +8,7 @@ import {
   X, Phone, Mail, MapPin, BadgeCheck, User,
   ShieldAlert, Loader2, AlertCircle, ArrowRight
 } from "lucide-react";
-import api from "../api/axios";
+import api from "../../api/axios";
 
 const passwordSchema = z
   .object({

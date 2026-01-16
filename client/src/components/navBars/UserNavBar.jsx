@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { BadgeCheck, User, LogOut, Settings } from "lucide-react";
 import api from "../../api/axios";
-import SettingsModal from "../settingModal";
+import SettingsModal from "../cards/settingModal";
 
 
 export default function Navbar({ onLogout }) {
