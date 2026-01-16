@@ -277,6 +277,82 @@ export default function OwnerAppointmentManagement() {
 
   const [sortBy, setSortBy] = useState("date-newest");
 
+  // Mock data - replace with actual API call
+  const [appointments, setAppointments] = useState([
+    {
+      id: 1,
+      propertyTitle: "Modern Apartment in Downtown",
+      propertyAddress: "123 Main St, New York, NY",
+      guestName: "John Smith",
+      guestPhone: "+1 (555) 123-4567",
+      guestEmail: "john.smith@email.com",
+      date: "2026-01-20",
+      time: "2:00 PM",
+      status: "pending",
+      notes: "Interested in viewing the apartment and discussing lease terms."
+    },
+    {
+      id: 2,
+      propertyTitle: "Luxury Villa with Pool",
+      propertyAddress: "456 Luxury Ln, Los Angeles, CA",
+      guestName: "Sarah Johnson",
+      guestPhone: "+1 (555) 987-6543",
+      guestEmail: "sarah.j@email.com",
+      date: "2026-01-22",
+      time: "10:00 AM",
+      status: "confirmed",
+      notes: "Looking for long-term rental options."
+    },
+    {
+      id: 3,
+      propertyTitle: "Cozy Studio Apartment",
+      propertyAddress: "789 Oak Ave, Chicago, IL",
+      guestName: "Mike Davis",
+      guestPhone: "+1 (555) 456-7890",
+      guestEmail: "mike.davis@email.com",
+      date: "2026-01-18",
+      time: "3:30 PM",
+      status: "completed",
+      notes: "First-time renter, showed property successfully."
+    },
+    {
+      id: 4,
+      propertyTitle: "Downtown Loft",
+      propertyAddress: "321 Broadway, Seattle, WA",
+      guestName: "Emma Wilson",
+      guestPhone: "+1 (555) 234-5678",
+      guestEmail: "emma.w@email.com",
+      date: "2026-01-25",
+      time: "1:00 PM",
+      status: "pending",
+      notes: "Prefers afternoon viewing times."
+    },
+    {
+      id: 5,
+      propertyTitle: "Beachfront Condo",
+      propertyAddress: "555 Ocean Dr, Miami, FL",
+      guestName: "Robert Brown",
+      guestPhone: "+1 (555) 345-6789",
+      guestEmail: "r.brown@email.com",
+      date: "2026-01-21",
+      time: "11:30 AM",
+      status: "confirmed",
+      notes: ""
+    },
+    {
+      id: 6,
+      propertyTitle: "Suburban Family Home",
+      propertyAddress: "890 Maple St, Austin, TX",
+      guestName: "Lisa Anderson",
+      guestPhone: "+1 (555) 567-8901",
+      guestEmail: "lisa.a@email.com",
+      date: "2026-01-15",
+      time: "4:00 PM",
+      status: "cancelled",
+      notes: "Guest cancelled due to schedule conflict."
+    }
+  ]);
+
   // Calculate stats
   const stats = {
     total: appointments.length,
