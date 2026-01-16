@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
+import api from "../../api/axios";
 
-import KycForm from "../components/Kyc/kycForm";
-import PropertyCard from "../components/property/PropertyCard";
-import AddPropertyCard from "../components/property/AddPropertyCard";
-import { AddPropertyDialog } from "../components/property/AddPropertyDialog";
+import PropertyCard from "../../components/property/Owner/MyPropertyCard";
+import AddPropertyCard from "../../components/property/Owner/AddPropertyCard";
+import { AddPropertyDialog } from "../../components/property/Owner/AddPropertyDialog";
 
 export default function MyProperties() {
+  const navigate = useNavigate();
+
   const [kycStatus, setKycStatus] = useState("loading");
   const [properties, setProperties] = useState([]);
 
@@ -17,10 +19,16 @@ export default function MyProperties() {
   const fetchKycStatus = async () => {
     try {
       const res = await api.get("/api/kyc/status");
-      setKycStatus(res.data.status);
+
+      if (res.data.status !== "verified") {
+        navigate("/kyc", { replace: true });
+        return;
+      }
+
+      setKycStatus("verified");
     } catch (err) {
       console.error(err);
-      setKycStatus("error");
+      navigate("/kyc", { replace: true });
     }
   };
 
@@ -45,7 +53,6 @@ export default function MyProperties() {
   }, [kycStatus]);
 
   /* ---------------- HANDLERS ---------------- */
-
   const handleAdd = () => {
     setEditingProperty(null);
     setOpenDialog(true);
@@ -85,47 +92,53 @@ export default function MyProperties() {
 
   if (kycStatus === "loading") {
     return (
-      <div className="pt-5 p-4">
-        <p>Checking KYC status...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-[#B59353] rounded-full animate-spin mb-4" />
+        <p className="font-bold text-gray-500">Checking KYC status...</p>
       </div>
     );
   }
 
   return (
-    <div className="pt-5 p-4">
-      <h1 className="text-2xl font-bold mb-6">My Properties</h1>
+    <div className="pt-24 md:pt-28 w-full min-h-screen bg-gray-50">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+        <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">
+          My Properties
+        </h1>
 
-      {kycStatus !== "verified" && (
-        <KycForm status={kycStatus} onSuccess={fetchKycStatus} />
-      )}
-
-      {kycStatus === "verified" && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {properties.map((property) => (
+        {/* Improved Grid with Fixed Aspect Ratio */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
+          {properties.map((property) => (
+            <div key={property.id} className="flex flex-col">
               <PropertyCard
-                key={property.id}
                 property={property}
                 onEdit={handleEdit}
                 onDelete={(p) => handleDelete(p.id)}
                 onDisable={(p) => handleDisable(p.id)}
+                className="h-full w-full"
               />
-            ))}
+            </div>
+          ))}
 
-            <AddPropertyCard onClick={handleAdd} />
+          {/* AddPropertyCard wrapper forced to stretch height */}
+          <div className="flex flex-col">
+            <AddPropertyCard
+              onClick={handleAdd}
+              className="h-full w-full border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-3 bg-white hover:border-[#B59353] hover:bg-gray-50 transition-all group min-h-[280px]"
+            />
           </div>
+        </div>
 
-          <AddPropertyDialog
-            isOpen={openDialog}
-            property={editingProperty}
-            onClose={() => {
-              setOpenDialog(false);
-              setEditingProperty(null);
-            }}
-            onSubmit={handlePropertySubmit}
-          />
-        </>
-      )}
+        <AddPropertyDialog
+          isOpen={openDialog}
+          property={editingProperty}
+          onClose={() => {
+            setOpenDialog(false);
+            setEditingProperty(null);
+          }}
+          onSubmit={handlePropertySubmit}
+        />
+      </div>
     </div>
   );
 }

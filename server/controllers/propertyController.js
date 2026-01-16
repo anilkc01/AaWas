@@ -2,60 +2,19 @@ import Property from "../models/property.js";
 import { Op } from "sequelize";
 import fs from "fs";
 import path from "path";
+import User from "../models/User.js";
+import Favourite from "../models/favourites.js";
+import PropertyReport from "../models/PropertyReports.js";
+import Appointment from "../models/appointments.js";
+import Kyc from "../models/Kyc.js";
 
-/**
- * Helper: Ensure property directory exists
- */
-const ensurePropertyDir = (propertyId) => {
-  const dir = `uploads/properties/${propertyId}`;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  return dir;
-};
+import {
+  ensurePropertyDir,
+  deleteFile,
+  deletePropertyFolder,
+  moveToPropertyFolder,
+} from "../Security/helpers.js";
 
-/**
- * Helper: Delete a file safely
- */
-const deleteFile = (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  } catch (error) {
-    console.error(`Failed to delete file: ${filePath}`, error);
-  }
-};
-
-/**
- * Helper: Delete entire property folder
- */
-const deletePropertyFolder = (propertyId) => {
-  const dir = `uploads/properties/${propertyId}`;
-  try {
-    if (fs.existsSync(dir)) {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  } catch (error) {
-    console.error(`Failed to delete folder: ${dir}`, error);
-  }
-};
-
-/**
- * Helper: Move file to property-specific folder
- */
-const moveToPropertyFolder = (sourcePath, propertyId, filename) => {
-  const propertyDir = ensurePropertyDir(propertyId);
-  const destPath = path.join(propertyDir, filename);
-  
-  try {
-    fs.renameSync(sourcePath, destPath);
-    return `uploads/properties/${propertyId}/${filename}`;
-  } catch (error) {
-    console.error('Failed to move file:', error);
-    return sourcePath;
-  }
-};
 
 /**
  * CREATE Property
@@ -191,12 +150,25 @@ export const updateProperty = async (req, res) => {
 
     // Convert boolean strings
     if (updates.isBidding !== undefined) {
-      updates.isBidding = updates.isBidding === "true" || updates.isBidding === true;
+      updates.isBidding =
+        updates.isBidding === "true" || updates.isBidding === true;
     }
 
     // Convert numeric strings
-    ['price', 'beds', 'living', 'kitchen', 'washroom', 'latitude', 'longitude'].forEach(field => {
-      if (updates[field] !== undefined && updates[field] !== null && updates[field] !== '') {
+    [
+      "price",
+      "beds",
+      "living",
+      "kitchen",
+      "washroom",
+      "latitude",
+      "longitude",
+    ].forEach((field) => {
+      if (
+        updates[field] !== undefined &&
+        updates[field] !== null &&
+        updates[field] !== ""
+      ) {
         updates[field] = Number(updates[field]);
       }
     });
@@ -248,7 +220,7 @@ export const getMyProperties = async (req, res) => {
   try {
     const properties = await Property.findAll({
       where: { userId: req.user.id },
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.json(properties);
@@ -258,19 +230,65 @@ export const getMyProperties = async (req, res) => {
   }
 };
 
+/*
 /**
- * GET Single Property
+ * GET Single Property  by id
  */
 export const getPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
-    const property = await Property.findByPk(id);
+    const userId = req.user?.id; // optional (for public access)
+    
+    const property = await Property.findByPk(id, {
+      include: [
+        {
+          model: User,
+          attributes: ["id", "fullName"],
+          include: [
+            {
+              model: Kyc,
+              attributes: ["image"],
+            },
+          ],
+        },
+      ],
+    });
 
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    res.json(property);
+    let isFavourite = false;
+    let hasAppointment = false;
+
+    if (userId) {
+      // Check favourite
+      const fav = await Favourite.findOne({
+        where: {
+          userId,
+          propertyId: id,
+        },
+      });
+      isFavourite = !!fav;
+
+      // Check appointment (only for non-bidding properties)
+      if (!property.isBidding) {
+        const appointment = await Appointment.findOne({
+          where: {
+            userId,
+            propertyId: id,
+            status: ["pending", "confirmed"],
+          },
+        });
+        hasAppointment = !!appointment;
+      }
+    }
+
+    res.json({
+      ...property.toJSON(),
+      isFavourite,
+      hasAppointment,
+    });
   } catch (error) {
     console.error("Get property error:", error);
     res.status(500).json({ message: "Failed to fetch property" });
@@ -283,9 +301,9 @@ export const getPropertyById = async (req, res) => {
 export const getAllProperties = async (req, res) => {
   try {
     const { propertyType, listedFor, minPrice, maxPrice } = req.query;
-    
+
     const where = { isAvailable: true };
-    
+
     if (propertyType) where.propertyType = propertyType;
     if (listedFor) where.listedFor = listedFor;
     if (minPrice) where.price = { ...where.price, [Op.gte]: minPrice };
@@ -293,13 +311,49 @@ export const getAllProperties = async (req, res) => {
 
     const properties = await Property.findAll({
       where,
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.json(properties);
   } catch (error) {
     console.error("Get all properties error:", error);
     res.status(500).json({ message: "Failed to fetch properties" });
+  }
+};
+
+/**
+ * GET All Properties (Public - for browsing)
+ */
+export const browseProperties = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const properties = await Property.findAll({
+      where: {
+        userId: { [Op.ne]: userId },
+        status: "available",
+      },
+      attributes: [
+        "id",
+        "dpImage",
+        "location",
+        "price",
+        "beds",
+        "kitchen",
+        "washroom",
+        "living",
+        "propertyType",
+        "listedFor",
+        "isBidding",
+        "createdAt",
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json(properties);
+  } catch (error) {
+    console.error("Error fetching properties:", error);
+    res.status(500).json({ error: "Failed to fetch properties" });
   }
 };
 
@@ -333,5 +387,94 @@ export const disableProperty = async (req, res) => {
   } catch (error) {
     console.error("Disable property error:", error);
     res.status(500).json({ message: "Failed to update property status" });
+  }
+};
+
+/**
+ * favourite Property
+ */
+export const toggleFavourite = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const propertyId = req.params.id;
+
+    const existing = await Favourite.findOne({
+      where: { userId, propertyId },
+    });
+
+    if (existing) {
+      await existing.destroy();
+      return res.json({
+        message: "Removed from favourites",
+        isFavourite: false,
+      });
+    }
+
+    await Favourite.create({ userId, propertyId });
+
+    res.json({
+      message: "Added to favourites",
+      isFavourite: true,
+    });
+  } catch (error) {
+    console.error("Toggle favourite error:", error);
+    res.status(500).json({ message: "Failed to toggle favourite" });
+  }
+};
+
+/**
+ * Report Property
+ */
+
+export const reportProperty = async (req, res) => {
+  const ALLOWED_REASONS = [
+    "fake_listing",
+    "scam",
+    "wrong_price",
+    "duplicate",
+    "offensive_content",
+    "other",
+  ];
+
+  try {
+    const userId = req.user.id;
+    const propertyId = req.params.id;
+    const { reason, message } = req.body;
+
+    if (!ALLOWED_REASONS.includes(reason)) {
+      return res.status(400).json({ message: "Invalid report reason" });
+    }
+
+    // 🔍 Check if user already reported this property
+    const existingReport = await PropertyReport.findOne({
+      where: { userId, propertyId },
+    });
+
+    if (existingReport) {
+      await existingReport.update({
+        reason,
+        message: message || null,
+      });
+
+      return res.json({
+        message: "Report updated successfully",
+        report: existingReport,
+      });
+    }
+
+    const report = await PropertyReport.create({
+      userId,
+      propertyId,
+      reason,
+      message: message || null,
+    });
+
+    res.status(201).json({
+      message: "Property reported successfully",
+      report,
+    });
+  } catch (error) {
+    console.error("Report property error:", error);
+    res.status(500).json({ message: "Failed to report property" });
   }
 };

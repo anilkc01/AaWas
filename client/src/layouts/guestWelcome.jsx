@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import Navbar from "../components/navBars/NavBar1";
+import Navbar from "../components/navBars/GuestNavBar";
 import Welcome from "../pages/welcome";
 import AboutUs from "../pages/aboutUs";
 import LoginModal from "../components/AuthModals/LoginModal";

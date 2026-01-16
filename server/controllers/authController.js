@@ -78,6 +78,14 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         error: "EMAIL_NOT_FOUND",
+        message: "User doesnot exist"
+      });
+    }
+
+    //  ACCOUNT SUSPENDED CHECK
+    if (user.status === "suspended") {
+      return res.status(403).json({
+        error: "ACCOUNT_SUSPENDED",
       });
     }
 
@@ -86,10 +94,9 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         error: "INVALID_PASSWORD",
+        message: "Invalid Password"
       });
     }
-
-   
 
     const token = generateToken({ id: user.id }, remember);
 
@@ -109,12 +116,52 @@ export const loginUser = async (req, res) => {
   }
 };
 
+
 export const verifyToken = (req, res) => {
+  console.log("asdf");
   res.status(200).json({
     valid: true,
     user: {
       id: req.user.id,
       email: req.user.email,
+      role: req.user.role,      
+      status: req.user.status, 
     },
   });
+};
+
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = await User.findByPk(req.user.id);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Incorrect password. Deletion cancelled." });
+
+    await user.destroy();
+    res.status(200).json({ message: "Account deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export const changePassword = async (req, res) => {
+  console.log("aayo");
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findByPk(req.user.id);
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Current password incorrect" });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
