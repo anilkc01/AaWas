@@ -44,6 +44,22 @@ export const protect = async (req, res, next) => {
   }
 };
 
+export const maybeProtect = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization?.startsWith("Bearer")) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findByPk(decoded.id, { attributes: ["id"] });
+    } catch (error) {
+      req.user = null;
+    }
+  }
+
+  next();
+};
+
 export const requireAdmin = (req, res, next) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin access only" });

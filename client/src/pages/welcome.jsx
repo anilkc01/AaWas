@@ -1,7 +1,9 @@
 import { ArrowRight, ChevronDown, Search } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Welcome() {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
 
@@ -71,7 +73,10 @@ export default function Welcome() {
 
             {/* Separate Action Button - Perfect Circle */}
             <button className="bg-[#B59353] text-white w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl hover:bg-[#a68546] flex items-center justify-center transition-all hover:scale-110 active:scale-95 group shrink-0">
-              <ArrowRight className="h-7 w-7 md:h-8 md:w-8 stroke-[3px]" />
+              <ArrowRight
+                onClick={() => navigate("/browse")}
+                className="h-7 w-7 md:h-8 md:w-8 stroke-[3px]" />
+
             </button>
 
           </div>

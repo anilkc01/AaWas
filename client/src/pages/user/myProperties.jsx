@@ -5,6 +5,9 @@ import api from "../../api/axios";
 import PropertyCard from "../../components/property/Owner/MyPropertyCard";
 import AddPropertyCard from "../../components/property/Owner/AddPropertyCard";
 import { AddPropertyDialog } from "../../components/property/Owner/AddPropertyDialog";
+import { BidsAndAppointments } from "../../components/property/Owner/bidsAndAppointments";
+import { Bidders } from "../../components/property/Owner/Bidders";
+import { Appointments } from "../../components/property/Owner/Appointments";
 
 export default function MyProperties() {
   const navigate = useNavigate();
@@ -14,6 +17,9 @@ export default function MyProperties() {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
+
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   /* ---------------- KYC ---------------- */
   const fetchKycStatus = async () => {
@@ -73,6 +79,11 @@ export default function MyProperties() {
     }
   };
 
+  const handleCardClick = (property) => {
+    setSelectedProperty(property);
+    setShowDetails(true);
+  };
+
   const handleDisable = async (id) => {
     try {
       await api.patch(`/api/properties/${id}/disable`);
@@ -109,7 +120,7 @@ export default function MyProperties() {
         {/* Improved Grid with Fixed Aspect Ratio */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-stretch">
           {properties.map((property) => (
-            <div key={property.id} className="flex flex-col">
+            <div key={property.id} onClick={() => handleCardClick(property)}>
               <PropertyCard
                 property={property}
                 onEdit={handleEdit}
@@ -128,6 +139,22 @@ export default function MyProperties() {
             />
           </div>
         </div>
+
+        {selectedProperty?.isBidding ? (
+          <Bidders
+            isOpen={showDetails}
+            onClose={() => setShowDetails(false)}
+            property={selectedProperty}
+            refresh={fetchProperties}
+          />
+        ) : (
+          <Appointments
+            isOpen={showDetails}
+            onClose={() => setShowDetails(false)}
+            property={selectedProperty}
+            refresh={fetchProperties}
+          />
+        )}
 
         <AddPropertyDialog
           isOpen={openDialog}

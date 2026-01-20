@@ -1,19 +1,27 @@
-import Kyc from "../models/kyc.js";
 import User from "../models/User.js";
+import Property from "../models/property.js";
+import Deal from "../models/Deal.js";
+import { Op } from "sequelize";
+import Kyc from "../models/Kyc.js";
+import Rating from "../models/ratings.js";
 
 export const getUserProfile = async (req, res) => {
   try {
-    // The ID is now coming from the token middleware, not the URL params
-    const userId = req.user.id; 
 
-    // Fetch User and include associated Kyc data
+    const userId = req.params.id || req.user.id;
+
     const user = await User.findByPk(userId, {
       attributes: { exclude: ["password"] },
       include: [
         {
           model: Kyc,
-          attributes: ["id", "fullName", "address", "phone", "image", "status", "idType"],
+          attributes: ["id", "fullName", "address", "phone", "image", "status"],
         },
+        {
+          model: Rating,
+          as: "receivedRatings",
+          include: [{ model: User, as: "reviewer", attributes: ["fullName"] }],
+        }
       ],
     });
 
@@ -21,7 +29,13 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Map the response to a clean structure for the frontend
+    // Parallel counts for the bento stats
+    const [totalDeals, completedDeals, totalProperties] = await Promise.all([
+      Deal.count({ where: { [Op.or]: [{ buyerId: userId }, { sellerId: userId }] } }),
+      Deal.count({ where: { [Op.or]: [{ buyerId: userId }, { sellerId: userId }], status: 'completed' } }),
+      Property.count({ where: { userId } })
+    ]);
+
     const responseData = {
       id: user.id,
       fullName: user.fullName,
@@ -29,20 +43,24 @@ export const getUserProfile = async (req, res) => {
       phone: user.phone,
       role: user.role,
       status: user.status,
-      // Sequelize by default attaches the included model as the Model Name 
+      rating: user.rating,
       kyc: user.Kyc ? {
-        id: user.Kyc.id,
-        fullName: user.Kyc.fullName,
-        address: user.Kyc.address,
         image: user.Kyc.image,
+        address: user.Kyc.address,
         verificationStatus: user.Kyc.status,
-      } : null
+      } : null,
+      stats: {
+        totalDeals,
+        completedDeals,
+        totalProperties
+      },
+      reviews: user.receivedRatings || []
     };
-
+    console.log("User Profile Data:", responseData);
     res.status(200).json(responseData);
-
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+

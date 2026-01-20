@@ -34,6 +34,7 @@ export const createProperty = async (req, res) => {
       kitchen,
       washroom,
       isBidding,
+      biddingEndsAt
     } = req.body;
 
     // Validate required fields
@@ -55,6 +56,7 @@ export const createProperty = async (req, res) => {
       kitchen: kitchen || 1,
       washroom: washroom || 1,
       isBidding: isBidding === "true",
+      biddingEndsAt: isBidding === "true" ? biddingEndsAt : null,
       dpImage: req.files.dpImage[0].path,
       images: req.files.images?.map((f) => f.path) || [],
       userId: req.user.id,
@@ -152,6 +154,10 @@ export const updateProperty = async (req, res) => {
     if (updates.isBidding !== undefined) {
       updates.isBidding =
         updates.isBidding === "true" || updates.isBidding === true;
+
+      if (!updates.isBidding) {
+        updates.biddingEndsAt = null;
+      }
     }
 
     // Convert numeric strings
@@ -182,6 +188,8 @@ export const updateProperty = async (req, res) => {
     res.status(500).json({ message: "Failed to update property" });
   }
 };
+
+
 
 /**
  * DELETE Property
@@ -259,7 +267,7 @@ export const getPropertyById = async (req, res) => {
     }
 
     let isFavourite = false;
-    let hasAppointment = false;
+    let userAppointment = 0;
 
     if (userId) {
       // Check favourite
@@ -277,17 +285,18 @@ export const getPropertyById = async (req, res) => {
           where: {
             userId,
             propertyId: id,
-            status: ["pending", "confirmed"],
+            status: ["pending", "confirmed", "completed"],
           },
+          attributes: ["id", "status"]
         });
-        hasAppointment = !!appointment;
+        userAppointment = appointment ? appointment : 0;
       }
     }
 
     res.json({
       ...property.toJSON(),
       isFavourite,
-      hasAppointment,
+      userAppointment,
     });
   } catch (error) {
     console.error("Get property error:", error);
@@ -326,13 +335,18 @@ export const getAllProperties = async (req, res) => {
  */
 export const browseProperties = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id; 
+
+    let whereCondition = {
+      status: "available",
+    };
+
+    if (userId) {
+      whereCondition.userId = { [Op.ne]: userId };
+    }
 
     const properties = await Property.findAll({
-      where: {
-        userId: { [Op.ne]: userId },
-        status: "available",
-      },
+      where: whereCondition,
       attributes: [
         "id",
         "dpImage",

@@ -214,7 +214,7 @@ export default function LoginModal({ onLoginSuccess }) {
       <p className="text-[14px] font-medium text-center text-gray-600 mt-2">
         Don't have an account?
         <span
-          onClick={() => navigate("/register")}
+          onClick={() => navigate(`${location.pathname}?modal=register`)}
           className="text-[#B59353] font-bold ml-2 cursor-pointer hover:underline"
         >
           Register here

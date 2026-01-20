@@ -1,5 +1,5 @@
 import express from "express";
-import { protect } from "../middleware/auth.js";
+import { maybeProtect, protect } from "../middleware/auth.js";
 import { uploadPropertyImages } from "../middleware/uploads.js";
 import {
   createProperty,
@@ -30,7 +30,7 @@ router.get("/my-properties", protect, getMyProperties);
 router.get("/browse/:id", protect, getPropertyById);
 
 //Browse all properties except own
-router.get("/browse", protect, browseProperties);
+router.get("/browse", maybeProtect, browseProperties);
 
 //Delete
 router.delete("/:id", protect, deleteProperty);

@@ -13,6 +13,7 @@ import UsersPage from "./pages/admin/usersPage";
 import PropertiesPage from "./pages/admin/propertiesPage";
 import ReportsPage from "./pages/admin/reportsPage";
 import KycPage from "./pages/admin/kycPage";
+import toast from "react-hot-toast";
 
 export default function AppContent() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -35,6 +36,7 @@ export default function AppContent() {
       setAuthorized(true);
       setRole(res.data.user.role);
     } catch {
+      toast.error("Session expired. Please log in again.");
       setAuthorized(false);
       setRole(null);
     } finally {

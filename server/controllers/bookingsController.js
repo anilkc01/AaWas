@@ -1,17 +1,20 @@
+import { Op } from "sequelize";
+import { sequelize } from "../Database/database.js";
 import Appointment from "../models/appointments.js";
 import Bid from "../models/bids.js";
+import Deal from "../models/Deal.js";
+import Kyc from "../models/Kyc.js";
 import Property from "../models/property.js";
 import User from "../models/User.js";
 
+
 /**
- * GET - Get all bids for a property
+ * GET - Get all bids for a property with User and KYC details
  */
 export const getPropertyBids = async (req, res) => {
-    console.log("came to get bids");
   try {
     const { id: propertyId } = req.params;
 
-    // Check if property exists and is for bidding
     const property = await Property.findByPk(propertyId);
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
@@ -23,17 +26,18 @@ export const getPropertyBids = async (req, res) => {
       });
     }
 
-    // Get all active bids
-    
     const bids = await Bid.findAll({
-      where: {
-        propertyId,
-        status: "active",
-      },
+      where: { propertyId },
       include: [
         {
           model: User,
-          attributes: ["id", "fullName"],
+          attributes: ["id", "fullName", "rating"],
+          include: [
+            {
+              model: Kyc,
+              attributes: ["image"], 
+            },
+          ],
         },
       ],
       order: [["bidAmount", "DESC"]],
@@ -78,6 +82,23 @@ export const placeBid = async (req, res) => {
       return res.status(400).json({ 
         message: 'Property is not available for bidding' 
       });
+    }
+
+    // CHECK IF BIDDING IS ENABLED
+    if (!property.isBidding) {
+      return res.status(400).json({ message: 'This property is not open for bidding' });
+    }
+
+    // CHECK THE DEADLINE (New Logic)
+    if (property.biddingEndsAt) {
+      const now = new Date();
+      const deadline = new Date(property.biddingEndsAt);
+
+      if (now > deadline) {
+        return res.status(400).json({ 
+          message: `Bidding ended on ${deadline.toLocaleString()}. No more bids accepted.` 
+        });
+      }
     }
 
     // Get highest bid
@@ -134,7 +155,35 @@ export const placeBid = async (req, res) => {
   }
 };
 
+/**
+ * DELETE - Delete a bid
+ */
+export const deleteBid = async (req, res) => {
+  try {
+    const { id: bidId } = req.params;
+    const userId = req.user.id;
 
+    // Find the bid
+    const bid = await Bid.findByPk(bidId);
+    if (!bid) {
+      return res.status(404).json({ message: "Bid not found" });
+    }
+
+    // Check if the user owns this property
+    const property = await Property.findByPk(bid.propertyId);
+    if (property.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Delete the bid
+    await bid.destroy();
+
+    res.json({ message: "Bid deleted successfully" });
+  } catch (error) {
+    console.error("Delete bid error:", error);
+    res.status(500).json({ message: "Failed to delete bid" });
+  }
+};
 
 /**
  * POST - Book an appointment
@@ -145,35 +194,44 @@ export const bookAppointment = async (req, res) => {
     const userId = req.user.id;
     const { notes } = req.body;
 
-    // Check if property exists
     const property = await Property.findByPk(propertyId);
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    // Check if property is for bidding
     if (property.isBidding) {
       return res.status(400).json({
         message: "Cannot book appointment for bidding properties",
       });
     }
 
-    // Check if user already has an appointment for this property
     const existingAppointment = await Appointment.findOne({
       where: {
         userId,
         propertyId,
-        status: ["pending", "confirmed"],
       },
     });
 
     if (existingAppointment) {
-      return res.status(400).json({
-        message: "You already have an appointment for this property",
-      });
+
+      if (["pending", "confirmed", "completed"].includes(existingAppointment.status)) {
+        return res.status(400).json({
+          message: "You already have an active appointment for this property",
+        });
+      }
+
+      if (existingAppointment.status === "cancelled") {
+        existingAppointment.status = "pending";
+        existingAppointment.notes = notes || existingAppointment.notes;
+        await existingAppointment.save();
+
+        return res.status(200).json({
+          message: "Appointment re-booked successfully",
+          appointment: existingAppointment,
+        });
+      }
     }
 
-    // Create appointment
     const appointment = await Appointment.create({
       userId,
       propertyId,
@@ -191,6 +249,53 @@ export const bookAppointment = async (req, res) => {
   }
 };
 
+/*
+get all appointments for a property
+*/
+export const getAppointments = async (req, res) => {
+  try {
+    const { id: propertyId } = req.params;
+
+    const appointments = await Appointment.findAll({
+      where: { 
+        propertyId,
+        // Only fetch appointments that are NOT cancelled
+        status: {
+          [Op.ne]: "cancelled" 
+        }
+      },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "fullName", "rating"],
+          include: [
+            {
+              model: Kyc,
+              attributes: ["image"],
+            },
+          ],
+        },
+        {
+          model: Property,
+          attributes: ["id", "status", "listedFor"],
+          include: [
+            {
+              model: Deal, 
+              attributes: ["buyerId", "finalPrice"],
+            },
+          ],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json(appointments);
+  } catch (error) {
+    console.error("Fetch Appointments Error:", error);
+    res.status(500).json({ message: "Failed to fetch appointments" });
+  }
+};
+
 /**
  * GET - Check if user has an appointment for a property
  */
@@ -203,7 +308,7 @@ export const checkAppointment = async (req, res) => {
       where: {
         userId,
         propertyId,
-        status: ["pending", "confirmed"],
+        status: ["pending", "confirmed", "completed"],
       },
     });
 
@@ -217,48 +322,222 @@ export const checkAppointment = async (req, res) => {
   }
 };
 
-/**
- * DELETE - Cancel appointment
- */
-export const cancelAppointment = async (req, res) => {
+/*
+ Move. Appointment satus
+*/
+export const moveAppointment = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const { id: propertyId } = req.params;
-    const userId = req.user.id;
+    const { appointmentId } = req.body;
+    const currentUserId = req.user.id; // From protect middleware
 
-    // Check if property exists
-    const property = await Property.findByPk(propertyId);
-    if (!property) {
-      return res.status(404).json({
-        message: "Property not found",
+    const appointment = await Appointment.findByPk(appointmentId, {
+      include: [Property],
+      transaction: t
+    });
+
+    if (!appointment) {
+      await t.rollback();
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    // OWNER CHECK: Only the property creator can move the status
+    if (appointment.Property.userId !== currentUserId) {
+      await t.rollback();
+      return res.status(403).json({ message: "You are not authorized to manage this property's appointments" });
+    }
+
+    const currentStatus = appointment.status;
+    let nextStatus = currentStatus;
+
+    if (currentStatus === "pending") {
+      nextStatus = "confirmed";
+    } else if (currentStatus === "confirmed") {
+      nextStatus = "completed";
+    } else if (currentStatus === "completed") {
+      // Final step triggers the deal service
+      await executeFinalizeDeal(appointment.propertyId, appointment.userId, t);
+      await t.commit();
+      return res.json({ 
+        message: `Deal finalized! Property is now ${appointment.Property.listedFor === 'sell' ? 'Sold' : 'Rented'}.`,
+        isFinalized: true 
       });
     }
 
-    // Find active appointment
-    const appointment = await Appointment.findOne({
-      where: {
-        userId,
-        propertyId,
-        status: ["pending", "confirmed"],
-      },
+    await appointment.update({ status: nextStatus }, { transaction: t });
+    await t.commit();
+
+    res.json({ 
+      message: `Status moved to ${nextStatus}`, 
+      isFinalized: false 
+    });
+  } catch (error) {
+    if (t) await t.rollback();
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * DELETE - Cancel or Remove appointment */
+export const cancelAppointment = async (req, res) => {
+  try {
+    // 1. Get the Appointment ID from params
+    const { id: appointmentId } = req.params;
+    const currentUserId = req.user.id;
+
+    // 2. Find the appointment and include the Property to check ownership
+    const appointment = await Appointment.findByPk(appointmentId, {
+      include: [
+        {
+          model: Property,
+          attributes: ["id", "userId"], 
+        },
+      ],
     });
 
     if (!appointment) {
       return res.status(404).json({
-        message: "No active appointment found to cancel",
+        message: "Appointment not found",
       });
     }
 
-    // Update appointment status
+    // 3. Authorization Check
+    const isSeeker = appointment.userId === currentUserId;
+    const isOwner = appointment.Property.userId === currentUserId;
+
+    if (!isSeeker && !isOwner) {
+      return res.status(403).json({
+        message: "You are not authorized to perform this action",
+      });
+    }
+
+    // 4. Update status to 'cancelled'
     appointment.status = "cancelled";
     await appointment.save();
 
+    // 5. Custom message based on who deleted it
+    const successMessage = isOwner 
+      ? "Appointment removed from your list" 
+      : "Your appointment has been cancelled successfully";
+
     return res.status(200).json({
-      message: "Appointment cancelled successfully",
+      message: successMessage,
     });
   } catch (error) {
     console.error("Cancel appointment error:", error);
     return res.status(500).json({
-      message: "Failed to cancel appointment",
+      message: "Failed to process appointment cancellation",
     });
   }
+};
+
+
+/*
+  * POST - Finalize Deal for a Property
+*/
+export const finalizeDeal = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { propertyId, buyerId } = req.body;
+
+    const deal = await executeFinalizeDeal(propertyId, buyerId, t);
+
+    await t.commit();
+    res.status(200).json({ message: "Property assigned successfully", deal });
+  } catch (error) {
+    await t.rollback();
+    res.status(400).json({ message: error.message });
+  }
+};
+
+/*
+To be called when owner wants to end bidding manually
+*/
+
+export const endBid = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { id: propertyId } = req.params;
+    const ownerId = req.user.id;
+
+    const property = await Property.findByPk(propertyId, { transaction: t });
+
+    if (!property) {
+      await t.rollback();
+      return res.status(404).json({ message: "Property not found" });
+    }
+
+    if (property.userId !== ownerId) {
+      await t.rollback();
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    if (!property.isBidding || property.status !== 'available') {
+      await t.rollback();
+      return res.status(400).json({ message: "Bidding not active" });
+    }
+
+    const highestBid = await Bid.findOne({
+      where: { propertyId, status: 'active' },
+      order: [['bidAmount', 'DESC']],
+      transaction: t
+    });
+
+    if (!highestBid) {
+      await property.update({ isBidding: false }, { transaction: t });
+      await t.commit();
+      return res.status(200).json({ message: "Ended with no bidders" });
+    }
+
+    const deal = await executeFinalizeDeal(propertyId, highestBid.userId, t);
+
+    await t.commit();
+    res.status(200).json({ message: "Bidding ended and deal finalized", deal });
+
+  } catch (error) {
+    if (t) await t.rollback();
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * Service to finalize deal logic called by finalizeDeal or crron job
+ */
+export const executeFinalizeDeal = async (propertyId, buyerId, transaction) => {
+  const property = await Property.findByPk(propertyId, { transaction });
+  
+  if (!property || property.status !== 'available') {
+    throw new Error("Property is no longer available.");
+  }
+
+  // Determine Price: Use highest bid if bidding is on, otherwise base price
+  let finalPrice = property.price;
+  if (property.isBidding) {
+    const winningBid = await Bid.findOne({
+      where: { propertyId, userId: buyerId, status: 'active' },
+      order: [['bidAmount', 'DESC']],
+      transaction
+    });
+    if (winningBid) {
+      finalPrice = winningBid.bidAmount;
+      await winningBid.update({ status: 'accepted' }, { transaction });
+    }
+    // Reject all other bids
+    await Bid.update({ status: 'rejected' }, { where: { propertyId, status: 'active' }, transaction });
+  }
+
+  // Create the Deal
+  const deal = await Deal.create({
+    propertyId,
+    sellerId: property.userId,
+    buyerId,
+    finalPrice,
+    dealType: property.listedFor === 'sell' ? 'sale' : 'rent'
+  }, { transaction });
+
+  // Update Property Status
+  const newStatus = property.listedFor === 'sell' ? 'sold' : 'rented';
+  await property.update({ status: newStatus }, { transaction });
+
+  return deal;
 };

@@ -1,6 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleGetStarted = () => {
+   
+    navigate(`${location.pathname}?modal=login`);
+  };
+
   return (
     <nav className="w-full bg-white shadow-md fixed top-0 left-0 z-50">
       {/* Container: Adjusted height and padding for mobile vs desktop */}
@@ -20,15 +28,15 @@ export default function Navbar() {
             About Us
           </Link>
 
-          <Link
-            to="/login"
+          <button
+            onClick={handleGetStarted}
             className="bg-[#B59353] text-white font-bold
               px-4 py-2 md:px-8 md:py-3 rounded-lg md:rounded-xl 
               text-sm md:text-lg hover:bg-[#a68546] 
               transition-all shadow-md active:scale-95 whitespace-nowrap"
           >
             Get Started
-          </Link>
+          </button>
         </div>
       </div>
     </nav>

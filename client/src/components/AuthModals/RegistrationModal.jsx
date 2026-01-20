@@ -1,11 +1,12 @@
 import { X, Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/axios";
 import { RegistrationSchema } from "./schema.registration";
 
 export default function RegisterModal() {
   const navigate = useNavigate();
+  const location = useLocation();
   const closeModal = () => navigate("/");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -225,7 +226,7 @@ export default function RegisterModal() {
         <p className="text-[14px] font-medium text-center text-gray-600">
           Already have an account?
           <span
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(`${location.pathname}?modal=login`)}
             className="text-[#B59353] font-bold ml-2 cursor-pointer hover:underline"
           >
             Login here

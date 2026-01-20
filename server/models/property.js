@@ -76,9 +76,13 @@ const Property = sequelize.define("Property", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  biddingEndsAt: {
+    type: DataTypes.DATE,
+    allowNull: true, 
+  },
 
   status: {
-    type: DataTypes.ENUM("available", "booked"),
+    type: DataTypes.ENUM("available", "sold", "rented"),
     allowNull: false,
     defaultValue: "available",
   },
