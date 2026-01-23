@@ -34,8 +34,14 @@ const Kyc = sequelize.define("Kyc", {
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: " "
+    allowNull: true,
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    validate: {
+      len: [0, 1000],
+    },
   },
   status: {
     type: DataTypes.ENUM("pending", "verified", "rejected"),

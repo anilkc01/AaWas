@@ -5,6 +5,7 @@ import userRoutes from "./routes/userRoutes.js";
 import kycRoutes from "./routes/kycRoutes.js";
 import propertyRoutes from "./routes/propertyRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,7 +19,7 @@ import './services/bidHandler.js';
 const app = express();
 
 app.use(cors({
-  origin: "*", // React dev server
+  origin: "*",
 }));
 
 connection();
@@ -36,6 +37,8 @@ app.use("/api/kyc", kycRoutes);
 
 app.use("/api/properties", propertyRoutes);
 app.use("/api/bookings", bookingRoutes);
+
+app.use("/api/admin",adminRoutes)
 
 
 app.listen(5001,  "0.0.0.0", () => {

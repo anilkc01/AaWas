@@ -251,6 +251,7 @@ export const getPropertyById = async (req, res) => {
       include: [
         {
           model: User,
+          where: { status: "active" },
           attributes: ["id", "fullName"],
           include: [
             {
@@ -320,6 +321,13 @@ export const getAllProperties = async (req, res) => {
 
     const properties = await Property.findAll({
       where,
+      include: [
+        {
+          model: User,
+          where: { status: "active" },
+          attributes: ["id", "status"],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
@@ -347,6 +355,13 @@ export const browseProperties = async (req, res) => {
 
     const properties = await Property.findAll({
       where: whereCondition,
+      include: [
+        {
+          model: User,
+          where: { status: "active" }, 
+          attributes: ["id", "status"], 
+        },
+      ],
       attributes: [
         "id",
         "dpImage",

@@ -194,7 +194,7 @@ export default function LoginModal({ onLoginSuccess }) {
           </label>
         </div>
         <p
-          onClick={() => navigate("/forgot-password")}
+          onClick={() => navigate(`${location.pathname}?modal=forgotPassword`)}
           className="text-[14px] font-bold text-[#B59353] cursor-pointer hover:underline"
         >
           Forgot password?

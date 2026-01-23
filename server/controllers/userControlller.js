@@ -4,6 +4,7 @@ import Deal from "../models/Deal.js";
 import { Op } from "sequelize";
 import Kyc from "../models/Kyc.js";
 import Rating from "../models/ratings.js";
+import UserReport from "../models/UserReports.js";
 
 export const getUserProfile = async (req, res) => {
   try {
@@ -64,3 +65,32 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+
+
+export const reportUser = async (req, res) => {
+  try {
+    const { reportedUserId, reason, description } = req.body;
+    const reporterId = req.user.id; 
+
+    if (reporterId === parseInt(reportedUserId)) {
+      return res.status(400).json({ message: "You cannot report yourself" });
+    }
+
+    const userExists = await User.findByPk(reportedUserId);
+    if (!userExists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await UserReport.create({
+      reporterId,
+      reportedUserId,
+      reason,
+      description
+    });
+
+    res.status(201).json({ message: "Report submitted successfully. We will review it shortly." });
+  } catch (error) {
+    console.error("Report User Error:", error);
+    res.status(500).json({ message: "Failed to submit report" });
+  }
+};

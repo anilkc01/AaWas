@@ -1,7 +1,10 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { generateToken } from "../Security/jwt-utils.js";
-import jwt from "jsonwebtoken";
+import OTP from "../models/OTP.js";
+import nodemailer from "nodemailer";
+import { Op } from "sequelize";
+import { sendEmail } from "../Security/helpers.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -86,6 +89,7 @@ export const loginUser = async (req, res) => {
     if (user.status === "suspended") {
       return res.status(403).json({
         error: "ACCOUNT_SUSPENDED",
+        message: "Your account has been suspended. Please contact support."
       });
     }
 
@@ -163,5 +167,93 @@ export const changePassword = async (req, res) => {
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+    
+    if (!user) return res.status(404).json({ message: "No email found" });
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 5 * 60 * 1000);
+
+    await OTP.upsert({ userId: user.id, otp: otpCode, expiresAt: expiry });
+
+   
+    await sendEmail(
+      email,
+      "Password Reset OTP",
+      `<p>Your OTP for password reset is: <b style="font-size: 20px; color: #B59353;">${otpCode}</b></p>
+       <p>This code expires in 5 minutes.</p>`
+    );
+
+    res.status(200).json({ message: "OTP sent to your email" });
+  } catch (error) {
+    res.status(500).json({ message: "Could not Send OTP" });
+  }
+};
+
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "No email found" });
+
+    // Find valid OTP record
+    const otpRecord = await OTP.findOne({
+      where: {
+        userId: user.id,
+        otp: otp,
+        expiresAt: { [Op.gt]: new Date() }, 
+      },
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    res.status(200).json({ message: "OTP Verified" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error during verification" });
+  }
+};
+
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "No email found" });
+
+    
+    const otpRecord = await OTP.findOne({
+      where: {
+        userId: user.id,
+        otp: otp,
+        expiresAt: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Session expired. Please request a new OTP." });
+    }
+
+    // Hash new password and update
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await user.update({ password: hashedPassword });
+
+    
+    await otpRecord.destroy();
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Could not reset password" });
   }
 };

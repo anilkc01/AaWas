@@ -9,6 +9,8 @@ import {
   User as UserIcon,
   X,
   MessageSquarePlus,
+  Flag,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import api from "../../api/axios";
@@ -24,23 +26,27 @@ export const UserDetailCard = ({ userId, onClose }) => {
   const [myComment, setMyComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDesc, setReportDesc] = useState("");
+
   useEffect(() => {
     if (userId) fetchProfile();
   }, [userId]);
 
   const fetchProfile = async () => {
-  setLoading(true);
-  try {
-    // We call the SAME POST route but WITH a userId
-    const res = await api.get(`/api/user/profile/${userId}`);
-    setData(res.data);
-  } catch (err) {
-    toast.error("User profile unavailable");
-    onClose();
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      // We call the SAME POST route but WITH a userId
+      const res = await api.get(`/api/user/profile/${userId}`);
+      setData(res.data);
+    } catch (err) {
+      toast.error("User profile unavailable");
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRatingSubmit = async () => {
     if (myRating === 0) return toast.error("Please select a star rating");
@@ -62,6 +68,23 @@ export const UserDetailCard = ({ userId, onClose }) => {
     }
   };
 
+  const handleReportSubmit = async () => {
+    if (!reportReason) return toast.error("Please select a reason");
+    try {
+      await api.post(`/api/user/report`, {
+        reportedUserId: userId,
+        reason: reportReason,
+        description: reportDesc,
+      });
+      toast.success("User reported");
+      setShowReportForm(false);
+      setReportReason("");
+      setReportDesc("");
+    } catch (err) {
+      toast.error("Failed to submit report");
+    }
+  };
+
   if (loading)
     return (
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1100] flex items-center justify-center">
@@ -74,7 +97,6 @@ export const UserDetailCard = ({ userId, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1100] flex items-center justify-center p-4">
       <div className="bg-[#D1D5DB] rounded-[3rem] w-full max-w-md max-h-[95vh] overflow-y-auto shadow-2xl relative p-6 custom-scrollbar">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-6 right-6 p-1 text-gray-700 hover:bg-gray-200 rounded-full transition-colors z-10"
@@ -98,8 +120,8 @@ export const UserDetailCard = ({ userId, onClose }) => {
             </div>
             {data.kyc?.verificationStatus === "verified" && (
               <span className="absolute -bottom-0 -right-0 bg-white rounded-full p-0.5 shadow">
-                  <BadgeCheck className="w-4 h-4 md:w-5 md:h-5 text-green-500 fill-white" />
-                </span>
+                <BadgeCheck className="w-4 h-4 md:w-5 md:h-5 text-green-500 fill-white" />
+              </span>
             )}
           </div>
 
@@ -157,15 +179,36 @@ export const UserDetailCard = ({ userId, onClose }) => {
             </div>
           </div>
 
-          {/* Review Submission Toggle Button */}
-          {!showReviewInput && (
-            <button
-              onClick={() => setShowReviewInput(true)}
-              className="flex items-center gap-2 text-[10px] font-black uppercase bg-white px-6 py-3 rounded-full shadow-sm hover:bg-gray-50 transition-all active:scale-95"
-            >
-              <MessageSquarePlus size={14} /> Post a Review
-            </button>
-          )}
+          {/* Buttons review and report */}
+          <div className="flex items-center gap-3 w-full justify-center">
+            
+            {!showReviewInput && (
+              <button
+                onClick={() => {
+                  setShowReviewInput(true);
+                  setShowReportForm(false); 
+                }}
+                className="flex-1 flex items-center justify-center gap-2 text-[10px] font-black uppercase bg-white px-6 py-3 rounded-full shadow-sm hover:bg-gray-50 transition-all active:scale-95 border-2 border-transparent hover:border-gray-100"
+              >
+                <MessageSquarePlus size={14} /> Post a Review
+              </button>
+            )}
+
+            
+            {!showReviewInput && (
+              <button
+                onClick={() => setShowReportForm(!showReportForm)}
+                className={`p-3 rounded-full shadow-sm transition-all active:scale-95 border-2 ${
+                  showReportForm
+                    ? "bg-red-500 text-white border-red-500"
+                    : "bg-white text-gray-400 border-transparent hover:border-red-100 hover:text-red-500"
+                }`}
+                title="Report User"
+              >
+                <Flag size={18} fill={showReportForm ? "white" : "none"} />
+              </button>
+            )}
+          </div>
 
           {/* Conditional Rating Input */}
           {showReviewInput && (
@@ -201,6 +244,51 @@ export const UserDetailCard = ({ userId, onClose }) => {
                   className="flex-1 py-3 bg-[#D1D5DB] hover:bg-gray-300 rounded-full font-black text-xs uppercase transition-colors"
                 >
                   {submitting ? "..." : "Submit"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showReportForm && (
+            <div className="w-full bg-red-50 rounded-[2rem] p-6 border-2 border-red-100 animate-in slide-in-from-top-4 duration-300">
+              <div className="flex items-center gap-2 mb-4 text-red-600">
+                <AlertTriangle size={20} />
+                <span className="font-black text-xs uppercase tracking-tighter">
+                  Report this User
+                </span>
+              </div>
+
+              <select
+                className="w-full bg-white rounded-xl p-3 text-xs font-bold border-none mb-3 outline-none"
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+              >
+                <option value="">Select a reason...</option>
+                <option value="scam">Scam / Fraud</option>
+                <option value="harassment">Harassment</option>
+                <option value="fake_profile">Fake Profile</option>
+                <option value="other">Other</option>
+              </select>
+
+              <textarea
+                className="w-full bg-white rounded-xl p-3 text-xs font-medium border-none h-20 resize-none mb-3 outline-none"
+                placeholder="Briefly describe the issue..."
+                value={reportDesc}
+                onChange={(e) => setReportDesc(e.target.value)}
+              />
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowReportForm(false)}
+                  className="flex-1 py-2 font-black text-[10px] uppercase text-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReportSubmit}
+                  className="flex-1 py-2 bg-red-500 text-white rounded-full font-black text-[10px] uppercase"
+                >
+                  Submit Report
                 </button>
               </div>
             </div>

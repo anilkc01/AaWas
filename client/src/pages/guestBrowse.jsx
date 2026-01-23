@@ -82,7 +82,6 @@ export default function GuestBrowse() {
 
   const handleGuestClick = () => {
     toast("Join us to explore full details!", {
-      icon: "🏠",
       duration: 3000,
       style: { borderRadius: '15px', background: '#B59353', color: '#fff', fontWeight: 'bold' },
     });

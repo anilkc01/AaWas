@@ -6,7 +6,7 @@ import Deal from "../models/Deal.js";
 import Kyc from "../models/Kyc.js";
 import Property from "../models/property.js";
 import User from "../models/User.js";
-
+import { sendEmail } from "../Security/helpers.js";
 
 /**
  * GET - Get all bids for a property with User and KYC details
@@ -35,7 +35,7 @@ export const getPropertyBids = async (req, res) => {
           include: [
             {
               model: Kyc,
-              attributes: ["image"], 
+              attributes: ["image"],
             },
           ],
         },
@@ -54,7 +54,7 @@ export const getPropertyBids = async (req, res) => {
  * POST - Place a bid
  */
 export const placeBid = async (req, res) => {
-    console.log("caame to pace bid");
+  console.log("caame to pace bid");
   try {
     const { id: propertyId } = req.params;
     const userId = req.user.id;
@@ -68,25 +68,27 @@ export const placeBid = async (req, res) => {
     // Check if property exists and is for bidding
     const property = await Property.findByPk(propertyId);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return res.status(404).json({ message: "Property not found" });
     }
 
     if (!property.isBidding) {
-      return res.status(400).json({ 
-        message: 'This property is not open for bidding' 
+      return res.status(400).json({
+        message: "This property is not open for bidding",
       });
     }
 
     // Check if property is available
-    if (property.status !== 'available') {
-      return res.status(400).json({ 
-        message: 'Property is not available for bidding' 
+    if (property.status !== "available") {
+      return res.status(400).json({
+        message: "Property is not available for bidding",
       });
     }
 
     // CHECK IF BIDDING IS ENABLED
     if (!property.isBidding) {
-      return res.status(400).json({ message: 'This property is not open for bidding' });
+      return res
+        .status(400)
+        .json({ message: "This property is not open for bidding" });
     }
 
     // CHECK THE DEADLINE (New Logic)
@@ -95,8 +97,8 @@ export const placeBid = async (req, res) => {
       const deadline = new Date(property.biddingEndsAt);
 
       if (now > deadline) {
-        return res.status(400).json({ 
-          message: `Bidding ended on ${deadline.toLocaleString()}. No more bids accepted.` 
+        return res.status(400).json({
+          message: `Bidding ended on ${deadline.toLocaleString()}. No more bids accepted.`,
         });
       }
     }
@@ -105,15 +107,15 @@ export const placeBid = async (req, res) => {
     const highestBid = await Bid.findOne({
       where: {
         propertyId,
-        status: 'active',
+        status: "active",
       },
-      order: [['bidAmount', 'DESC']],
+      order: [["bidAmount", "DESC"]],
     });
 
     // Validate bid is higher than current highest
     if (highestBid && bidAmount <= parseFloat(highestBid.bidAmount)) {
-      return res.status(400).json({ 
-        message: `Bid must be higher than current highest bid of NPR ${Number(highestBid.bidAmount).toLocaleString()}` 
+      return res.status(400).json({
+        message: `Bid must be higher than current highest bid of NPR ${Number(highestBid.bidAmount).toLocaleString()}`,
       });
     }
 
@@ -122,7 +124,7 @@ export const placeBid = async (req, res) => {
       where: {
         userId,
         propertyId,
-        status: 'active',
+        status: "active",
       },
     });
 
@@ -132,7 +134,7 @@ export const placeBid = async (req, res) => {
       await existingBid.save();
 
       return res.json({
-        message: 'Bid updated successfully',
+        message: "Bid updated successfully",
         bid: existingBid,
       });
     }
@@ -142,16 +144,16 @@ export const placeBid = async (req, res) => {
       userId,
       propertyId,
       bidAmount,
-      status: 'active',
+      status: "active",
     });
 
     res.status(201).json({
-      message: 'Bid placed successfully',
+      message: "Bid placed successfully",
       bid,
     });
   } catch (error) {
-    console.error('Place bid error:', error);
-    res.status(500).json({ message: 'Failed to place bid' });
+    console.error("Place bid error:", error);
+    res.status(500).json({ message: "Failed to place bid" });
   }
 };
 
@@ -213,8 +215,11 @@ export const bookAppointment = async (req, res) => {
     });
 
     if (existingAppointment) {
-
-      if (["pending", "confirmed", "completed"].includes(existingAppointment.status)) {
+      if (
+        ["pending", "confirmed", "completed"].includes(
+          existingAppointment.status,
+        )
+      ) {
         return res.status(400).json({
           message: "You already have an active appointment for this property",
         });
@@ -236,7 +241,7 @@ export const bookAppointment = async (req, res) => {
       userId,
       propertyId,
       notes,
-      status: 'pending',
+      status: "pending",
     });
 
     res.status(201).json({
@@ -257,12 +262,12 @@ export const getAppointments = async (req, res) => {
     const { id: propertyId } = req.params;
 
     const appointments = await Appointment.findAll({
-      where: { 
+      where: {
         propertyId,
         // Only fetch appointments that are NOT cancelled
         status: {
-          [Op.ne]: "cancelled" 
-        }
+          [Op.ne]: "cancelled",
+        },
       },
       include: [
         {
@@ -280,7 +285,7 @@ export const getAppointments = async (req, res) => {
           attributes: ["id", "status", "listedFor"],
           include: [
             {
-              model: Deal, 
+              model: Deal,
               attributes: ["buyerId", "finalPrice"],
             },
           ],
@@ -333,7 +338,7 @@ export const moveAppointment = async (req, res) => {
 
     const appointment = await Appointment.findByPk(appointmentId, {
       include: [Property],
-      transaction: t
+      transaction: t,
     });
 
     if (!appointment) {
@@ -344,7 +349,12 @@ export const moveAppointment = async (req, res) => {
     // OWNER CHECK: Only the property creator can move the status
     if (appointment.Property.userId !== currentUserId) {
       await t.rollback();
-      return res.status(403).json({ message: "You are not authorized to manage this property's appointments" });
+      return res
+        .status(403)
+        .json({
+          message:
+            "You are not authorized to manage this property's appointments",
+        });
     }
 
     const currentStatus = appointment.status;
@@ -358,18 +368,18 @@ export const moveAppointment = async (req, res) => {
       // Final step triggers the deal service
       await executeFinalizeDeal(appointment.propertyId, appointment.userId, t);
       await t.commit();
-      return res.json({ 
-        message: `Deal finalized! Property is now ${appointment.Property.listedFor === 'sell' ? 'Sold' : 'Rented'}.`,
-        isFinalized: true 
+      return res.json({
+        message: `Deal finalized! Property is now ${appointment.Property.listedFor === "sell" ? "Sold" : "Rented"}.`,
+        isFinalized: true,
       });
     }
 
     await appointment.update({ status: nextStatus }, { transaction: t });
     await t.commit();
 
-    res.json({ 
-      message: `Status moved to ${nextStatus}`, 
-      isFinalized: false 
+    res.json({
+      message: `Status moved to ${nextStatus}`,
+      isFinalized: false,
     });
   } catch (error) {
     if (t) await t.rollback();
@@ -390,7 +400,7 @@ export const cancelAppointment = async (req, res) => {
       include: [
         {
           model: Property,
-          attributes: ["id", "userId"], 
+          attributes: ["id", "userId"],
         },
       ],
     });
@@ -416,8 +426,8 @@ export const cancelAppointment = async (req, res) => {
     await appointment.save();
 
     // 5. Custom message based on who deleted it
-    const successMessage = isOwner 
-      ? "Appointment removed from your list" 
+    const successMessage = isOwner
+      ? "Appointment removed from your list"
       : "Your appointment has been cancelled successfully";
 
     return res.status(200).json({
@@ -431,10 +441,9 @@ export const cancelAppointment = async (req, res) => {
   }
 };
 
-
 /*
-  * POST - Finalize Deal for a Property
-*/
+ * POST - Finalize Deal for a Property
+ */
 export const finalizeDeal = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -472,15 +481,21 @@ export const endBid = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    if (!property.isBidding || property.status !== 'available') {
+    if (!property.isBidding || property.status !== "available") {
       await t.rollback();
       return res.status(400).json({ message: "Bidding not active" });
     }
 
     const highestBid = await Bid.findOne({
-      where: { propertyId, status: 'active' },
-      order: [['bidAmount', 'DESC']],
-      transaction: t
+      where: { propertyId, status: "active" },
+      order: [["bidAmount", "DESC"]],
+      include: [
+        {
+          model: User, 
+          attributes: ["fullName", "email"],
+        },
+      ],
+      transaction: t,
     });
 
     if (!highestBid) {
@@ -492,8 +507,26 @@ export const endBid = async (req, res) => {
     const deal = await executeFinalizeDeal(propertyId, highestBid.userId, t);
 
     await t.commit();
-    res.status(200).json({ message: "Bidding ended and deal finalized", deal });
 
+    try {
+      const subject = "Congratulations! You won the bid";
+      const htmlContent = `
+        <div style="border: 2px solid #B59353; padding: 20px; border-radius: 15px;">
+          <h2 style="color: #111827;">You are the High Bidder!</h2>
+          <p>Hi <b>${highestBid.User?.fullName || "User"}</b>,</p>
+          <p>Great news! The bidding for the property in <b>${property.location}</b> has ended, and your bid of 
+             <span style="color: #B59353; font-weight: bold;">Rs. ${highestBid.bidAmount}</span> was the winner.</p>
+          <p>A deal has been automatically generated. Please log in to your dashboard to proceed with the next steps.</p>
+          
+        </div>
+      `;
+      console.log("Sending winner email to:", highestBid.User?.email);
+      await sendEmail(highestBid.User.email, subject, htmlContent);
+    } catch (emailErr) {
+      console.error("Winner email failed to send:", emailErr);
+    }
+
+    res.status(200).json({ message: "Bidding ended and deal finalized", deal });
   } catch (error) {
     if (t) await t.rollback();
     res.status(500).json({ message: error.message });
@@ -505,8 +538,8 @@ export const endBid = async (req, res) => {
  */
 export const executeFinalizeDeal = async (propertyId, buyerId, transaction) => {
   const property = await Property.findByPk(propertyId, { transaction });
-  
-  if (!property || property.status !== 'available') {
+
+  if (!property || property.status !== "available") {
     throw new Error("Property is no longer available.");
   }
 
@@ -514,29 +547,35 @@ export const executeFinalizeDeal = async (propertyId, buyerId, transaction) => {
   let finalPrice = property.price;
   if (property.isBidding) {
     const winningBid = await Bid.findOne({
-      where: { propertyId, userId: buyerId, status: 'active' },
-      order: [['bidAmount', 'DESC']],
-      transaction
+      where: { propertyId, userId: buyerId, status: "active" },
+      order: [["bidAmount", "DESC"]],
+      transaction,
     });
     if (winningBid) {
       finalPrice = winningBid.bidAmount;
-      await winningBid.update({ status: 'accepted' }, { transaction });
+      await winningBid.update({ status: "accepted" }, { transaction });
     }
     // Reject all other bids
-    await Bid.update({ status: 'rejected' }, { where: { propertyId, status: 'active' }, transaction });
+    await Bid.update(
+      { status: "rejected" },
+      { where: { propertyId, status: "active" }, transaction },
+    );
   }
 
   // Create the Deal
-  const deal = await Deal.create({
-    propertyId,
-    sellerId: property.userId,
-    buyerId,
-    finalPrice,
-    dealType: property.listedFor === 'sell' ? 'sale' : 'rent'
-  }, { transaction });
+  const deal = await Deal.create(
+    {
+      propertyId,
+      sellerId: property.userId,
+      buyerId,
+      finalPrice,
+      dealType: property.listedFor === "sell" ? "sale" : "rent",
+    },
+    { transaction },
+  );
 
   // Update Property Status
-  const newStatus = property.listedFor === 'sell' ? 'sold' : 'rented';
+  const newStatus = property.listedFor === "sell" ? "sold" : "rented";
   await property.update({ status: newStatus }, { transaction });
 
   return deal;

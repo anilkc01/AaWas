@@ -81,9 +81,7 @@ export default function Welcome() {
 
           </div>
 
-          <p className="text-white/90 mt-6 md:mt-8 text-lg md:text-xl font-bold drop-shadow-md ml-2">
-            Explore <span className="underline decoration-[#B59353] decoration-2 underline-offset-8 cursor-pointer">500+ Luxury Properties</span>
-          </p>
+          
 
         </div>
       </div>

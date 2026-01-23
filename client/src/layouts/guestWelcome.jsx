@@ -5,6 +5,7 @@ import AboutUs from "../pages/aboutUs";
 import LoginModal from "../components/AuthModals/LoginModal";
 import RegisterModal from "../components/AuthModals/RegistrationModal";
 import GuestBrowse from "../pages/guestBrowse";
+import ForgotPasswordModal from "../components/AuthModals/forgotPasword";
 
 
 
@@ -21,7 +22,8 @@ export default function GuestPage({ onLoginSuccess }) {
   
   const isLogin = modalType === "login";
   const isRegister = modalType === "register";
-  const showModal = isLogin || isRegister;
+  const isForgotPassword = modalType === "forgotPassword";
+  const showModal = isLogin || isRegister || isForgotPassword;
 
   
 const closeModal = () => {
@@ -47,6 +49,12 @@ const closeModal = () => {
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0 bg-black/20" onClick={closeModal}></div>
           <RegisterModal />
+        </div>
+      )}
+      {isForgotPassword && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-black/20" onClick={closeModal}></div>
+          <ForgotPasswordModal />
         </div>
       )}
     </>
