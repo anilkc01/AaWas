@@ -275,3 +275,138 @@ export const ChangePasswordDialog = ({ isOpen, onClose, onSuccess }) => {
     </div>
   );
 };
+        {/* Content */}
+        <div className="p-6 sm:p-8 space-y-6 overflow-y-auto scrollbar-hide">
+          {error && (
+            <div className="bg-red-50 border-2 border-red-100 text-red-700 px-4 py-3 rounded-2xl font-black text-sm animate-in fade-in slide-in-from-top-2">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-50 border-2 border-green-100 text-green-700 px-4 py-3 rounded-2xl font-black text-sm animate-in fade-in slide-in-from-top-2">
+              Password changed successfully! 🎉
+            </div>
+          )}
+
+          {/* Current Password */}
+          <div className="space-y-2">
+            <label className="block text-xs sm:text-sm font-black text-gray-700 uppercase tracking-widest">
+              Current Password
+            </label>
+            <div className="relative">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2">
+                <Lock size={20} className="text-gray-400" />
+              </div>
+              <input
+                type={showPasswords.current ? "text" : "password"}
+                name="currentPassword"
+                value={formData.currentPassword}
+                onChange={handleInputChange}
+                className="w-full pl-14 pr-14 py-4 border-2 border-gray-100 rounded-2xl focus:border-[#B59353] outline-none font-bold text-gray-700"
+                placeholder="Enter current password"
+                disabled={loading || success}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("current")}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPasswords.current ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* New Password */}
+          <div className="space-y-2">
+            <label className="block text-xs sm:text-sm font-black text-gray-700 uppercase tracking-widest">
+              New Password
+            </label>
+            <div className="relative">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2">
+                <Lock size={20} className="text-gray-400" />
+              </div>
+              <input
+                type={showPasswords.new ? "text" : "password"}
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                className="w-full pl-14 pr-14 py-4 border-2 border-gray-100 rounded-2xl focus:border-[#B59353] outline-none font-bold text-gray-700"
+                placeholder="Enter new password"
+                disabled={loading || success}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("new")}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPasswords.new ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            <p className="text-xs font-bold text-gray-400 pl-1">
+              Must be at least 8 characters
+            </p>
+          </div>
+
+          {/* Confirm Password */}
+          <div className="space-y-2">
+            <label className="block text-xs sm:text-sm font-black text-gray-700 uppercase tracking-widest">
+              Confirm New Password
+            </label>
+            <div className="relative">
+              <div className="absolute left-5 top-1/2 -translate-y-1/2">
+                <Lock size={20} className="text-gray-400" />
+              </div>
+              <input
+                type={showPasswords.confirm ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className="w-full pl-14 pr-14 py-4 border-2 border-gray-100 rounded-2xl focus:border-[#B59353] outline-none font-bold text-gray-700"
+                placeholder="Confirm new password"
+                disabled={loading || success}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("confirm")}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPasswords.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Security Tips */}
+          <div className="p-4 sm:p-5 bg-blue-50 rounded-2xl border-2 border-blue-100">
+            <p className="text-xs font-black text-blue-900 uppercase tracking-wider mb-2">
+              Security Tips
+            </p>
+            <ul className="space-y-1 text-xs font-bold text-blue-700">
+              <li>• Use a mix of letters, numbers, and symbols</li>
+              <li>• Avoid common words or personal information</li>
+              <li>• Don't reuse passwords from other accounts</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 sm:px-10 sm:py-6 border-t bg-white sticky bottom-0 flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 z-20">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="px-8 py-3 sm:py-4 border-2 border-gray-100 rounded-2xl font-black text-gray-500 hover:bg-gray-50 transition-all text-sm sm:text-base disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading || success}
+            className="px-8 sm:px-12 py-3 sm:py-4 bg-[#B59353] text-white rounded-2xl font-black hover:bg-[#a68546] disabled:opacity-50 transition-all shadow-xl shadow-[#B59353]/20 text-sm sm:text-base"
+          >
+            {loading ? "Changing..." : success ? "Changed!" : "Change Password"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
