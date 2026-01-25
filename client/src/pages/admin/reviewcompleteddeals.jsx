@@ -101,13 +101,7 @@ const completedDealsList = [
   service: "Laundry Service",
   completedDate: "2026-02-07",
 },
-{
-  id: 15,
-  seeker: "Arjun Basnet",
-  provider: "Safe Home CCTV",
-  service: "CCTV Installation",
-  completedDate: "2026-02-10",
-},
+
 
 ];
 
