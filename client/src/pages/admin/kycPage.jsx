@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Eye, ChevronLeft, ChevronRight, User as UserIcon } from "lucide-react";
+import { X, Eye, ChevronLeft, ChevronRight, Mail,  Phone,  MapPin,  File } from "lucide-react";
 import api from "../../api/axios";
 import { toast } from "react-hot-toast";
 
@@ -188,13 +188,57 @@ export default function KycPage() {
               </div>
               <h3 className="font-black text-2xl text-black uppercase text-center">{selectedKyc.fullName}</h3>
               <div className="mt-2 text-center">
-                <p className="text-xs font-bold text-gray-500">{selectedKyc.email}</p>
-                <p className="text-[10px] font-black text-[#B59353] mt-1 uppercase italic">{selectedKyc.address}</p>
+                {/* --- User Details List --- */}
+<div className="mt-8 space-y-5 px-4">
+  {/* Email */}
+  <div className="flex items-center gap-4 group">
+    <div className="p-3 bg-gray-100 rounded-2xl text-gray-500 group-hover:bg-[#B59353]/10 group-hover:text-[#B59353] transition-colors">
+      <Mail size={18} strokeWidth={2.5} />
+    </div>
+    <div className="flex flex-col">
+      <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">Official Email</span>
+      <span className="text-sm font-bold text-black">{selectedKyc.email}</span>
+    </div>
+  </div>
+
+  {/* Phone */}
+  <div className="flex items-center gap-4 group">
+    <div className="p-3 bg-gray-100 rounded-2xl text-gray-500 group-hover:bg-[#B59353]/10 group-hover:text-[#B59353] transition-colors">
+      <Phone size={18} strokeWidth={2.5} />
+    </div>
+    <div className="flex flex-col">
+      <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">Phone Number</span>
+      <span className="text-sm font-bold text-black">{selectedKyc.phone}</span>
+    </div>
+  </div>
+
+  {/* Address */}
+  <div className="flex items-center gap-4 group">
+    <div className="p-3 bg-gray-100 rounded-2xl text-gray-500 group-hover:bg-[#B59353]/10 group-hover:text-[#B59353] transition-colors">
+      <MapPin size={18} strokeWidth={2.5} />
+    </div>
+    <div className="flex flex-col">
+      <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">Physical Address</span>
+      <span className="text-sm font-bold text-black italic">{selectedKyc.address || "Not Provided"}</span>
+    </div>
+  </div>
+
+  {/* ID Type */}
+  <div className="flex items-center gap-4 group">
+    <div className="p-3 bg-gray-100 rounded-2xl text-gray-500 group-hover:bg-[#B59353]/10 group-hover:text-[#B59353] transition-colors">
+      <File size={18} strokeWidth={2.5} />
+    </div>
+    <div className="flex flex-col">
+      <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em]">Document Type</span>
+      <span className="text-sm font-bold text-[#B59353] uppercase">{selectedKyc.idType || "Identity Card"}</span>
+    </div>
+  </div>
+</div>
               </div>
             </div>
 
             <div className="mt-8 space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Identity Document: {selectedKyc.idType}</p>
+              
               <div className="aspect-video w-full bg-gray-50 rounded-[2rem] border-2 border-black overflow-hidden relative group">
                 <img src={`${API_BASE}/${selectedKyc.documentImage}`} className="w-full h-full object-contain" alt="Document" />
                 <a href={`${API_BASE}/${selectedKyc.documentImage}`} target="_blank" rel="noreferrer" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">

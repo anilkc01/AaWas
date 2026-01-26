@@ -134,8 +134,8 @@ export default function BrowseProperties() {
 
   return (
     <>
-      <div className="pt-24 w-full min-h-screen bg-gray-50">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div className="pt-20 w-full min-h-screen bg-gray-50">
+        <div className="max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6">
           
           <div className="flex justify-between items-end mb-6">
             <h1 className="text-2xl md:text-3xl font-black text-gray-900">Browse Properties</h1>
@@ -196,7 +196,7 @@ export default function BrowseProperties() {
                   <p className="text-gray-400 font-bold">No properties found matching your criteria.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                   {filteredProperties.map((p) => (
                     <UserPropertyCard key={p.id} property={p} onClick={() => setSelectedPropertyId(p.id)} />
                   ))}

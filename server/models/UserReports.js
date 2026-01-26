@@ -33,6 +33,10 @@ const UserReport = sequelize.define("UserReport", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  status: {
+    type: DataTypes.ENUM("pending", "resolved"),
+    defaultValue: "pending",
+  },
 }, {
   tableName: "user_reports",
   timestamps: true

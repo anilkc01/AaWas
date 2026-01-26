@@ -31,6 +31,10 @@ const PropertyReport = sequelize.define("PropertyReport", {
   message: {
     type: DataTypes.TEXT,
   },
+  status: {
+    type: DataTypes.ENUM("pending", "resolved"),
+    defaultValue: "pending",
+  },
 });
 
 // Associations
