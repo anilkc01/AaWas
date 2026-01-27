@@ -236,3 +236,119 @@ export const ViewProfileDialog = ({ isOpen, onClose, onEdit }) => {
     </div>
   );
 };
+              {/* Profile Information Cards */}
+              <div className="space-y-4">
+                {/* Email */}
+                <div className="p-5 bg-gray-50 rounded-2xl border-2 border-gray-100 hover:border-[#B59353]/30 transition-all">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-white rounded-xl shadow-sm">
+                      <Mail size={24} className="text-[#B59353]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">
+                        Email Address
+                      </p>
+                      <p className="text-base sm:text-lg font-bold text-gray-900">
+                        {profile.email || 'Not provided'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                {profile.phone && (
+                  <div className="p-5 bg-gray-50 rounded-2xl border-2 border-gray-100 hover:border-[#B59353]/30 transition-all">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-white rounded-xl shadow-sm">
+                        <Phone size={24} className="text-[#B59353]" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">
+                          Phone Number
+                        </p>
+                        <p className="text-base sm:text-lg font-bold text-gray-900">
+                          {profile.phone}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Address */}
+                {profile.address && (
+                  <div className="p-5 bg-gray-50 rounded-2xl border-2 border-gray-100 hover:border-[#B59353]/30 transition-all">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-white rounded-xl shadow-sm">
+                        <MapPin size={24} className="text-[#B59353]" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">
+                          Address
+                        </p>
+                        <p className="text-base sm:text-lg font-bold text-gray-900">
+                          {profile.address}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bio/Description */}
+                {profile.bio && (
+                  <div className="p-5 bg-gray-50 rounded-2xl border-2 border-gray-100">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">
+                      About Me
+                    </p>
+                    <p className="text-sm sm:text-base font-bold text-gray-700 leading-relaxed">
+                      {profile.bio}
+                    </p>
+                  </div>
+                )}
+
+                {/* Account Stats */}
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="p-4 bg-gradient-to-br from-[#B59353] to-[#d4af6a] rounded-2xl text-center">
+                    <p className="text-2xl sm:text-3xl font-black text-white">
+                      {profile.propertiesCount || 0}
+                    </p>
+                    <p className="text-xs font-bold text-white/80 uppercase tracking-wider mt-1">
+                      Properties
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-gray-700 to-gray-900 rounded-2xl text-center">
+                    <p className="text-2xl sm:text-3xl font-black text-white">
+                      {profile.bidsCount || 0}
+                    </p>
+                    <p className="text-xs font-bold text-white/80 uppercase tracking-wider mt-1">
+                      Bids Placed
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+        {/* Footer */}
+        {!loading && !error && onEdit && (
+          <div className="p-6 sm:px-10 sm:py-6 border-t bg-white sticky bottom-0 flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 z-20">
+            <button
+              onClick={onClose}
+              className="px-8 py-3 sm:py-4 border-2 border-gray-100 rounded-2xl font-black text-gray-500 hover:bg-gray-50 transition-all text-sm sm:text-base"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                onClose();
+                onEdit(profile);
+              }}
+              className="px-8 sm:px-12 py-3 sm:py-4 bg-[#B59353] text-white rounded-2xl font-black hover:bg-[#a68546] transition-all shadow-xl shadow-[#B59353]/20 text-sm sm:text-base flex items-center justify-center gap-2"
+            >
+              <Edit2 size={20} />
+              Edit Profile
+            </button>
+          </div>
+        )}
