@@ -36,7 +36,7 @@ export default function AppContent() {
       setAuthorized(true);
       setRole(res.data.user.role);
     } catch {
-      toast.error("Session expired. Please log in again.");
+      toast.error("Session expired. Please log in again.", { id: "authError" });
       setAuthorized(false);
       setRole(null);
     } finally {

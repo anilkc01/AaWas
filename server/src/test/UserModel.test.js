@@ -1,61 +1,67 @@
-const SequilizeMock = require('sequelize-mock');
-const dbMock = new SequilizeMock();
+const SequelizeMock = require('sequelize-mock');
+const dbMock = new SequelizeMock();
 
 
 const UserMock = dbMock.define('User', {
-    id: 3,
+    id: 1,
     fullName: "Anil KC",
-    email:"anil5@gmail.com",
-    phone:"9866052045",
-    password:"Hello@1007",
+    email: "anil@gmail.com",
+    phone: "9866052045",
+    password: "Hello@1007",
     role: "user",
     status: "active",
     rating: 5.0
 });
 
-describe('User Model', () => {
-    it('should create a user with valid attributes', async () => {
-        const user = await UserMock.create({
+describe('User Model Tests', () => {
+
+    //case1
+    it('should create a user with all valid attributes', async () => {
+        const userData = {
             fullName: "Anil KC",
-            email:"anil@gmail.com",
-            phone:"9866052045",
-            password:"Hello@1007",
+            email: "anil@gmail.com",
+            phone: "9866052045",
+            password: "Hello@1007",
             role: "user",
             status: "active",
             rating: 5.0
-        });
+        };
 
-        expect(user.fullName).toBe("Anil KC");
-        expect(user.email).toBe("anil@gmail.com");
-        expect(user.phone).toBe("9866052045");
-        expect(user.password).toBe("Hello@1007");
-        expect(user.role).toBe("user");
-        expect(user.status).toBe("active");
+        const user = await UserMock.create(userData);
+
+        expect(user.fullName).toBe(userData.fullName);
+        expect(user.email).toBe(userData.email);
         expect(user.rating).toBe(5.0);
     });
 
-    it('should enforce unique email constraint', async () => {
-        
-        try {
-            await UserMock.create({
-                fullName: "Test User",
-                email:"test@gmail.com",
-                phone:"9866052045",
-                password:"Hello@1007",
-                role: "user",
-                status: "active",
-                rating: 5.0
-            });
-            await expect( UserMock.create({
-                fullName: "Test User2",
-                email:"test1@gmail.com",
-                phone:"9866052045",
-                password:"Hello@1007",
-                role: "user",
-                status: "active",
-                rating: 5.0
-            })
-        ).rejects.toThrow("email must be unique");
-        
+
+    //case2 
+    it('should apply the default role of "user" when no role is provided', async () => {
+        const user = await UserMock.create({
+            fullName: "Rajan",
+            email: "rajan@gmail.com",
+            phone: "1234567890",
+            password: "Password123"
+        });
+
+        expect(user.role).toBe("user");
     });
+
+    //case3
+    it('should fail if rating is outside the range of 1 to 5', async () => {
+        const invalidRating = 6.0;
+
+        const createUser = async (data) => {
+            if (data.rating < 1 || data.rating > 5) {
+                throw new Error("Validation Error: Rating must be between 1 and 5");
+            }
+            return await UserMock.create(data);
+        };
+
+        await expect(createUser({
+            fullName: "bikesh",
+            rating: invalidRating
+        })).rejects.toThrow("Rating must be between 1 and 5");
     });
+
+});

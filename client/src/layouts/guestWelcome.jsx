@@ -34,7 +34,7 @@ const closeModal = () => {
     <>
       <div className={showModal ? "filter blur-sm pointer-events-none" : ""}>
         <Navbar />
-        {/* Now these stay TRUE even when the modal is open! */}
+        
         {isAboutUs ? <AboutUs /> : isBrowse ? <GuestBrowse /> : <Welcome />}
       </div>
 

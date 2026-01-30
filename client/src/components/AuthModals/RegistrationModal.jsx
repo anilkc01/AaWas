@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/axios";
 import { RegistrationSchema } from "./schema.registration";
+import toast from "react-hot-toast";
 
 export default function RegisterModal() {
   const navigate = useNavigate();
@@ -63,7 +64,8 @@ export default function RegisterModal() {
 
     try {
       await api.post("/api/auth/register", formData);
-      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+      navigate(`${location.pathname}?modal=login`);
+      toast.success("Registration successful! Please log in.");
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors((prev) => ({ ...prev, ...err.response.data.errors }));

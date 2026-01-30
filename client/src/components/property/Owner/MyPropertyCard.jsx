@@ -102,7 +102,7 @@ export default function PropertyCard({
                 {getShortLocation(property.location)}
             </span>
           </div>
-          <span className="text-lg font-black text-green-600">
+          <span className="text-sm font-black text-green-600">
             NPR {property.price.toLocaleString()}
           </span>
         </div>

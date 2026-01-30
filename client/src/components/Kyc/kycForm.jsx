@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../../api/axios";
 import { KycSchema } from "./schema.kyc"
+import { toast } from "react-hot-toast";
 
 export default function KycForm({ status, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -75,7 +76,7 @@ export default function KycForm({ status, onSuccess }) {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("KYC submitted successfully");
+      toast.success("KYC submitted successfully",{id: "kycSuccess"});
       onSuccess();
     } catch (err) {
       setError(err.response?.data?.message || "KYC submission failed");
