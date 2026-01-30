@@ -38,8 +38,8 @@ const User = sequelize.define(
       defaultValue: "active",
     },
     rating: {
-      type: DataTypes.FLOAT, // Allows for values like 4.5
-      allowNull: true,       // Shows as null if no ratings exist
+      type: DataTypes.FLOAT, 
+      allowNull: true,
       validate: {
         min: 1,
         max: 5

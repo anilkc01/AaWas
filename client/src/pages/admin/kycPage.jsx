@@ -19,7 +19,7 @@ export default function KycPage() {
 
   useEffect(() => {
     fetchKycs();
-    setCurrentPage(1); // Reset page when switching tabs
+    setCurrentPage(1); 
   }, [currentStatus]);
 
   const fetchKycs = async () => {
